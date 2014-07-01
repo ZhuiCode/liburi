@@ -2,7 +2,7 @@ Source: liburi
 Section: web
 Priority: extra
 Maintainer: Mo McRoberts <mo.mcroberts@bbc.co.uk>
-Build-Depends: debhelper (>= 8.0.0)
+Build-Depends: debhelper (>= 8.0.0), autoconf, automake, libtool
 
 Package: liburi
 Architecture: any
