@@ -1,6 +1,6 @@
 [submodule "uriparser"]
 	path = uriparser
-	url = git://github.com/nevali/uriparser.git
+	url = git://github.com/bbcarchdev/uriparser.git
 [submodule "m4"]
 	path = m4
-	url = git://github.com/nevali/m4.git
+	url = git://github.com/bbcarchdev/m4.git
