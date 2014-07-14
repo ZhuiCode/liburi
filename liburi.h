@@ -52,6 +52,9 @@ extern "C" {
 	/* Create a URI from an existing URI and optional base URI */
 	URI *uri_create_uri(const URI *restrict source, const URI *restrict base);
 
+	/* Create a file: URI from the current working directory */
+	URI *uri_create_cwd(void);
+
 	/* Destroy a URI, freeing the resources it uses */
 	int uri_destroy(URI *uri);
 

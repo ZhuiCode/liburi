@@ -145,6 +145,29 @@ uri_preprocess_(char *restrict buf, const char *restrict uristr, size_t nbytes)
 }
 
 URI *
+uri_create_cwd(void)
+{
+	char *pathbuf;
+	URI *uri;
+	
+	pathbuf = (char *) calloc(1, 7 + PATH_MAX + 1);
+	if(!pathbuf)
+	{
+		return NULL;
+	}
+	strcpy(pathbuf, "file://");
+	if(!getcwd(&(pathbuf[7]), PATH_MAX + 1))
+	{
+		free(pathbuf);
+		return NULL;
+	}
+	uri = uri_create_str(pathbuf, NULL);
+	free(pathbuf);
+	return uri;
+}
+	
+
+URI *
 uri_create_str(const char *restrict uristr, const URI *restrict base)
 {
 	UriParserStateA state;
