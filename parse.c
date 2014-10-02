@@ -150,7 +150,7 @@ uri_create_cwd(void)
 	char *pathbuf;
 	URI *uri;
 	
-	pathbuf = (char *) calloc(1, 7 + PATH_MAX + 1);
+	pathbuf = (char *) calloc(1, 7 + PATH_MAX + 2);
 	if(!pathbuf)
 	{
 		return NULL;
@@ -161,6 +161,7 @@ uri_create_cwd(void)
 		free(pathbuf);
 		return NULL;
 	}
+	pathbuf[strlen(pathbuf)] = '/';
 	uri = uri_create_str(pathbuf, NULL);
 	free(pathbuf);
 	return uri;
