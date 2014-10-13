@@ -1,3 +1,7 @@
+## Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+##
+## Copyright 2014 BBC.
+
 ## Copyright 2012 Mo McRoberts.
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +16,7 @@
 ##  See the License for the specific language governing permissions and
 ##  limitations under the License.
 
-AC_INIT([liburi],[master], [https://github.com/nevali/liburi/issues],,[https://github.com/nevali/liburi])
+AC_INIT([liburi],m4_esyscmd([/bin/sh m4/get-version.sh]),[RESFeedback@bbc.co.uk],,[https://github.com/bbcarchdev/liburi])
 PACKAGE_DESC="URI parsing library"
 AC_SUBST([PACKAGE_DESC])
 

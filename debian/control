@@ -11,11 +11,10 @@ Description: URI parsing library
 
 Package: liburi-dev
 Architecture: any
-Depends: ${misc:Depends}, liburi
+Depends: ${misc:Depends}, liburi (= ${binary:Version})
 Description: URI parsing library (development files)
 
 Package: uri-utils
 Architecture: any
-Depends: ${misc:Depends}, liburi
+Depends: ${misc:Depends}, liburi (= ${binary:Version})
 Description: URI parsing library (command-line utilities)
-
