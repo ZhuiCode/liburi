@@ -1,6 +1,6 @@
 ## Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
 ##
-## Copyright 2014 BBC.
+## Copyright 2014-2015 BBC.
 
 ## Copyright 2012 Mo McRoberts.
 ##
@@ -31,6 +31,10 @@ BT_PROG_XCODE
 AC_PROG_CC([clang gcc c99 cc])
 AC_PROG_CC_C99
 AC_PROG_CXX
+
+BT_PROG_CC_DEBUG
+BT_PROG_CC_WARN
+
 AC_HEADER_STDC
 LT_INIT
 
