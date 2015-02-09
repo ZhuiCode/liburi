@@ -1,3 +1,8 @@
+/* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+ *
+ * Copyright 2015 BBC
+ */
+
 /*
  * Copyright 2012 Mo McRoberts.
  *
@@ -20,9 +25,9 @@
 
 #include "p_testsuite.h"
 
-static int testlen(const char *restrict file, const char *name, URI *restrict uri, struct urimatch *restrict test, size_t (*fn)(URI *restrict, char *restrict, size_t), size_t expected);
+static int testlen(const char *restrict file, const char *name, const URI *restrict uri, struct urimatch *restrict test, size_t (*fn)(const URI *restrict, char *restrict, size_t), size_t expected);
 
-static int teststr(const char *restrict file, const char *name, URI *restrict uri, char *restrict buf, size_t buflen, struct urimatch *restrict test, size_t (*fn)(URI *restrict, char *restrict, size_t), const char *restrict expected);
+static int teststr(const char *restrict file, const char *name, const URI *restrict uri, char *restrict buf, size_t buflen, struct urimatch *restrict test, size_t (*fn)(const URI *restrict, char *restrict, size_t), const char *restrict expected);
 
 int
 test_urimatch(const char *file, struct urimatch *tests)
@@ -143,7 +148,7 @@ test_urimatch(const char *file, struct urimatch *tests)
 }
 
 static int
-testlen(const char *restrict file, const char *name, URI *restrict uri, struct urimatch *restrict test, size_t (*fn)(URI *restrict, char *restrict, size_t), size_t expected)
+testlen(const char *restrict file, const char *name, const URI *restrict uri, struct urimatch *restrict test, size_t (*fn)(const URI *restrict, char *restrict, size_t), size_t expected)
 {
 	size_t r;
 
@@ -157,7 +162,7 @@ testlen(const char *restrict file, const char *name, URI *restrict uri, struct u
 }
 
 static int
-teststr(const char *restrict file, const char *name, URI *restrict uri, char *restrict buffer, size_t buflen, struct urimatch *restrict test, size_t (*fn)(URI *restrict, char *restrict, size_t), const char *restrict expected)
+teststr(const char *restrict file, const char *name, const URI *restrict uri, char *restrict buffer, size_t buflen, struct urimatch *restrict test, size_t (*fn)(const URI *restrict, char *restrict, size_t), const char *restrict expected)
 {
 	size_t r;
 

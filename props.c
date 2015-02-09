@@ -1,3 +1,8 @@
+/* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+ *
+ * Copyright 2015 BBC
+ */
+
 /*
  * Copyright 2012 Mo McRoberts.
  *
@@ -20,47 +25,47 @@
 
 #include "p_liburi.h"
 
-static ssize_t uri_get_(UriTextRangeA *restrict range, char *restrict buf, size_t bufsize);
+static ssize_t uri_get_(const UriTextRangeA *restrict range, char *restrict buf, size_t bufsize);
 static int uri_addch_(int ch, char *restrict *restrict buf, size_t *restrict buflen);
 
 size_t
-uri_scheme(URI *restrict uri, char *restrict buf, size_t buflen)
+uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	return uri_get_(&(uri->uri.scheme), buf, buflen);
 }
 
 size_t
-uri_auth(URI *restrict uri, char *restrict buf, size_t buflen)
+uri_auth(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	return uri_get_(&(uri->uri.userInfo), buf, buflen);
 }
 
 size_t
-uri_host(URI *restrict uri, char *restrict buf, size_t buflen)
+uri_host(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	return uri_get_(&(uri->uri.hostText), buf, buflen);
 }
 
 size_t
-uri_port(URI *restrict uri, char *restrict buf, size_t buflen)
+uri_port(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	return uri_get_(&(uri->uri.portText), buf, buflen);
 }
 
 size_t
-uri_query(URI *restrict uri, char *restrict buf, size_t buflen)
+uri_query(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	return uri_get_(&(uri->uri.query), buf, buflen);
 }
 
 size_t
-uri_fragment(URI *restrict uri, char *restrict buf, size_t buflen)
+uri_fragment(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	return uri_get_(&(uri->uri.fragment), buf, buflen);
 }
 
 int
-uri_absolute_path(URI *uri)
+uri_absolute_path(const URI *uri)
 {
 	if(uri->uri.absolutePath == URI_TRUE)
 	{
@@ -78,7 +83,7 @@ uri_absolute_path(URI *uri)
 }
 
 int
-uri_absolute(URI *uri)
+uri_absolute(const URI *uri)
 {
 	if(uri->uri.scheme.first)
 	{
@@ -88,7 +93,7 @@ uri_absolute(URI *uri)
 }
 
 size_t
-uri_path(URI *restrict uri, char *restrict buf, size_t buflen)
+uri_path(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	size_t total, len;
 	char *bp;
@@ -149,7 +154,7 @@ uri_path(URI *restrict uri, char *restrict buf, size_t buflen)
 }
 
 int
-uri_portnum(URI *uri)
+uri_portnum(const URI *uri)
 {
 	char buffer[32], *t;
 	size_t len;
@@ -173,7 +178,7 @@ uri_portnum(URI *uri)
 }
 
 URI_INFO *
-uri_info(URI *uri)
+uri_info(const URI *uri)
 {
 	URI_INFO *p;
 	char *buf;
@@ -251,13 +256,13 @@ uri_info_destroy(URI_INFO *info)
 
 /* Compare two URIs and test for equality */
 int
-uri_equal(URI *a, URI *b)
+uri_equal(const URI *a, const URI *b)
 {
 	return uriEqualsUriA(&(a->uri), &(b->uri));
 }
 
 static ssize_t
-uri_get_(UriTextRangeA *restrict range, char *restrict buf, size_t bufsize)
+uri_get_(const UriTextRangeA *restrict range, char *restrict buf, size_t bufsize)
 {
 	size_t len, slen;
 

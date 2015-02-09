@@ -1,3 +1,8 @@
+/* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+ *
+ * Copyright 2015 BBC
+ */
+
 /*
  * Copyright 2012 Mo McRoberts.
  *
@@ -227,6 +232,7 @@ uri_create_uri(const URI *restrict source, const URI *restrict base)
 {
 	URI *uri;
 	UriParserStateA state;
+	char *p;
 
 	uri = (URI *) calloc(1, sizeof(URI));
 	if(!uri)
@@ -243,7 +249,7 @@ uri_create_uri(const URI *restrict source, const URI *restrict base)
 	}
 	else
 	{
-		uri->buf = strdup(source->buf);
+		uri->buf = uri_stralloc(source);
 		if(!uri->buf)
 		{
 			uri_destroy(uri);

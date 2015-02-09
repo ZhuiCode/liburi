@@ -1,3 +1,8 @@
+/* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+ *
+ * Copyright 2015 BBC
+ */
+
 /*
  * Copyright 2012 Mo McRoberts.
  *
@@ -19,6 +24,7 @@
 
 # include <stdio.h>
 # include <stdlib.h>
+# include <unistd.h>
 # include <wchar.h>
 # include <errno.h>
 # include <limits.h>

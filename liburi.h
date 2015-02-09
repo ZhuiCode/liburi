@@ -59,51 +59,51 @@ extern "C" {
 	int uri_destroy(URI *uri);
 
 	/* Return 1 if the URI specified is absolute, 0 if it is relative */
-	int uri_absolute(URI *uri);
+	int uri_absolute(const URI *uri);
 
 	/* Return 1 if the path in the URI specified is absolute, 0 if it is
 	 * relative
 	 */
-	int uri_absolute_path(URI *uri);
+	int uri_absolute_path(const URI *uri);
 	
 	/* Copy the URI's scheme into the buffer provided */
-	size_t uri_scheme(URI *restrict uri, char *restrict buf, size_t buflen);
+	size_t uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 	/* Copy the URI's authentication information into the buffer provided */
-	size_t uri_auth(URI *restrict uri, char *restrict buf, size_t buflen);
+	size_t uri_auth(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 	/* Copy the URI's hostname into the buffer provided */
-	size_t uri_host(URI *restrict uri, char *restrict buf, size_t buflen);
+	size_t uri_host(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 	/* Copy the URI's port into the buffer provided */
-	size_t uri_port(URI *restrict uri, char *restrict buf, size_t buflen);
+	size_t uri_port(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 	/* Copy the URI's path into the buffer provided */
-	size_t uri_path(URI *restrict uri, char *restrict buf, size_t buflen);
+	size_t uri_path(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 	/* Copy the URI's query string into the buffer provided */
-	size_t uri_query(URI *restrict uri, char *restrict buf, size_t buflen);
+	size_t uri_query(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 	/* Copy the URI's fragment into the buffer provided */
-	size_t uri_fragment(URI *restrict uri, char *restrict buf, size_t buflen);
+	size_t uri_fragment(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 	/* Return the URI's port number, if present, as an integer */
-	int uri_portnum(URI *uri);
+	int uri_portnum(const URI *uri);
 
 	/* Copy the whole URI, as a string, into the buffer provided */
-	size_t uri_str(URI *restrict uri, char *restrict buf, size_t buflen);
+	size_t uri_str(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 	/* Allocate a new string using malloc() and copy the URI into it */
-	char *uri_stralloc(URI *restrict uri);
+	char *uri_stralloc(const URI *restrict uri);
 
 	/* Copy the various parts of the URI to a URI_INFO structure */
-	URI_INFO *uri_info(URI *uri);
+	URI_INFO *uri_info(const URI *uri);
 	
 	/* Free a URI_INFO structure */
 	int uri_info_destroy(URI_INFO *info);
 
 	/* Compare two URIs and test for equality */
-	int uri_equal(URI *a, URI *b);
+	int uri_equal(const URI *a, const URI *b);
 	
 # if defined(__cplusplus)
 }

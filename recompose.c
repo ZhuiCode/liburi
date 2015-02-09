@@ -21,7 +21,7 @@
 #include "p_liburi.h"
 
 size_t
-uri_str(URI *restrict uri, char *restrict buf, size_t buflen)
+uri_str(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	int bufsize;
 
@@ -43,7 +43,7 @@ uri_str(URI *restrict uri, char *restrict buf, size_t buflen)
 
 /* Allocate a new string using malloc() and copy the URI into it */
 char *
-uri_stralloc(URI *restrict uri)
+uri_stralloc(const URI *restrict uri)
 {
 	size_t needed;
 	char *str;
