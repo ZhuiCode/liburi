@@ -1,5 +1,9 @@
-/*
- * Copyright 2012 Mo McRoberts.
+/* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+ *
+ * Copyright (c) 2015 BBC
+ */
+
+/* Copyright 2012 Mo McRoberts.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -38,7 +42,7 @@ static int omitempty;
 static void parseargs(int argc, char **argv);
 static void usage(void);
 static URI *parseuris(void);
-static int printcomp(URI *uri, const char *name, size_t (*fn)(URI *restrict, char *restrict, size_t), char **buffer, size_t *len);
+static int printcomp(URI *uri, const char *name, size_t (*fn)(const URI *restrict, char *restrict, size_t), char **buffer, size_t *len);
 static int printesc(const char *string);
 static int print_uri(URI *uri);
 static int print_components(URI *uri);
@@ -152,7 +156,7 @@ parseuris(void)
 }
 
 static int
-printcomp(URI *uri, const char *name, size_t (*fn)(URI *restrict, char *restrict, size_t), char **buffer, size_t *len)
+printcomp(URI *uri, const char *name, size_t (*fn)(const URI *restrict, char *restrict, size_t), char **buffer, size_t *len)
 {
 	size_t r;
 	char *p;
