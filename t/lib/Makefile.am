@@ -14,12 +14,9 @@
 ##  See the License for the specific language governing permissions and
 ##  limitations under the License.
 
-SUBDIRS = lib .
+noinst_LTLIBRARIES = liburi-tests.la
 
-LIBS = @LIBS@ lib/liburi-tests.la
+liburi_tests_la_SOURCES = p_tests.h \
+	match.c
 
-TESTS = anchor file-http-base parse-http
-
-XFAIL_TESTS = anchor file-http-base
-
-check_PROGRAMS = $(TESTS)
+liburi_tests_la_LIBADD = $(top_builddir)/liburi.la

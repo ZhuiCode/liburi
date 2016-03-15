@@ -49,6 +49,7 @@ AC_CONFIG_FILES([Makefile
 m4/Makefile
 util/Makefile
 t/Makefile
+t/lib/Makefile
 liburi.pc
 liburi-uninstalled.pc
 ])

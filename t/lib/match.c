@@ -1,10 +1,8 @@
 /* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
  *
- * Copyright 2015 BBC
- */
-
-/*
- * Copyright 2012 Mo McRoberts.
+ * Copyright 2015-2016 BBC
+ *
+ * Copyright 2012 Mo McRoberts
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,14 +21,14 @@
 # include "config.h"
 #endif
 
-#include "p_testsuite.h"
+#include "p_tests.h"
 
 static int testlen(const char *restrict file, const char *name, const URI *restrict uri, struct urimatch *restrict test, size_t (*fn)(const URI *restrict, char *restrict, size_t), size_t expected);
 
-static int teststr(const char *restrict file, const char *name, const URI *restrict uri, char *restrict buf, size_t buflen, struct urimatch *restrict test, size_t (*fn)(const URI *restrict, char *restrict, size_t), const char *restrict expected);
+static int teststr(const char *restrict file, const char *name, const URI *restrict uri, char *restrict buf, size_t buflen, const char *restrict testuri, size_t (*fn)(const URI *restrict, char *restrict, size_t), const char *restrict expected);
 
 int
-test_urimatch(const char *file, struct urimatch *tests)
+test_urimatch(const char *restrict file, struct urimatch *restrict tests)
 {
 	URI *uri, *base;
 	int c;
@@ -55,7 +53,7 @@ test_urimatch(const char *file, struct urimatch *tests)
 				fprintf(stderr, "%s: failed to construct base URI '%s': %s\n", file, tests[c].base, strerror(errno));
 				failed++;
 				continue;
-			}			
+			}
 		}
 		bl += strlen(tests[c].uri);
 		uri = uri_create_str(tests[c].uri, base);
@@ -122,7 +120,7 @@ test_urimatch(const char *file, struct urimatch *tests)
 #define TESTSTR(name, mask) \
 		if(tests[c].testmask & mask) \
 		{ \
-			didfail += teststr(file, #name, uri, buffer, bufsize, &(tests[c]), uri_##name, tests[c].name); \
+			didfail += teststr(file, #name, uri, buffer, bufsize, tests[c].uri, uri_##name, tests[c].name); \
 		}
 		TESTSTR(scheme, UM_SCHEME);
 		TESTSTR(auth, UM_AUTH);
@@ -134,7 +132,7 @@ test_urimatch(const char *file, struct urimatch *tests)
 #undef TESTSTR
 		if(tests[c].testmask & UM_RECOMPOSED)
 		{
-			didfail += teststr(file, "recomposed string", uri, buffer, bufsize, &(tests[c]), uri_str, tests[c].recomposed);
+			didfail += teststr(file, "recomposed string", uri, buffer, bufsize, tests[c].uri, uri_str, tests[c].recomposed);
 		}
 		if(didfail)
 		{
@@ -145,6 +143,34 @@ test_urimatch(const char *file, struct urimatch *tests)
 	}
 	free(buffer);
 	return failed ? FAIL : PASS;
+}
+
+int
+test_recomposed(const char *restrict file, const char *restrict src, const char *restrict expected, URI *restrict base)
+{
+	URI *uri;
+	char *buffer;
+	size_t buflen;
+	int r;
+	
+	uri = uri_create_str(src, base);
+	if(!uri)
+	{
+		fprintf(stderr, "%s: failed to construct URI <%s>: %s\n", file, src, strerror(errno));
+		return HARDERR;
+	}
+	buflen = (strlen(src) * 3) + 1;
+	buffer = (char *) calloc(1, buflen);
+	if(!buffer)
+	{
+		fprintf(stderr, "%s: failed to allocate buffer for result of recomposing <%s>\n", file, src);
+		uri_destroy(uri);
+		return HARDERR;
+	}
+	r = teststr(file, "recomposed string", uri, buffer, buflen, src, uri_str, expected);
+	free(buffer);
+	uri_destroy(uri);
+	return r == 0 ? PASS : FAIL;
 }
 
 static int
@@ -162,7 +188,7 @@ testlen(const char *restrict file, const char *name, const URI *restrict uri, st
 }
 
 static int
-teststr(const char *restrict file, const char *name, const URI *restrict uri, char *restrict buffer, size_t buflen, struct urimatch *restrict test, size_t (*fn)(const URI *restrict, char *restrict, size_t), const char *restrict expected)
+teststr(const char *restrict file, const char *name, const URI *restrict uri, char *restrict buffer, size_t buflen, const char *restrict testuri, size_t (*fn)(const URI *restrict, char *restrict, size_t), const char *restrict expected)
 {
 	size_t r;
 
@@ -170,17 +196,17 @@ teststr(const char *restrict file, const char *name, const URI *restrict uri, ch
 	r = fn(uri, buffer, buflen);
 	if(r == (size_t) -1)
 	{
-		fprintf(stderr, "%s: failed to obtain %s for URI '%s'\n", file, name, test->uri);
+		fprintf(stderr, "%s: <%s>: failed to obtain %s\n", file, testuri, name);
 		return 1;
 	}
 	if(r == 0 && expected)
 	{
-		fprintf(stderr, "%s: expected %s '%s', but result was NULL for URI '%s'\n", file, name, expected, test->uri);
+		fprintf(stderr, "%s: <%s>: expected %s '%s', but result was NULL\n", file, testuri, name, expected);
 		return 1;
 	}
 	if(r && !expected)
 	{
-		fprintf(stderr, "%s: expected NULL %s, but result was '%s' for URI '%s'\n", file, name, buffer, test->uri);
+		fprintf(stderr, "%s: <%s>: expected NULL %s, but result was '%s'\n", file, testuri, name, buffer);
 		return 1;
 	}
 	if(!expected)
@@ -189,8 +215,9 @@ teststr(const char *restrict file, const char *name, const URI *restrict uri, ch
 	}
 	if(strcmp(buffer, expected))
 	{
-		fprintf(stderr, "%s: expected '%s' for %s, but result was '%s' for URI '%s'\n", file, expected, name, buffer, test->uri);
+		fprintf(stderr, "%s: <%s>: expected '%s' for %s, but result was '%s'\n", file, testuri, expected, name, buffer);
 		return 1;
 	}
+	fprintf(stderr, "%s: OK: <%s>: matched '%s' for %s\n", file, testuri, expected, name);
 	return 0;
 }

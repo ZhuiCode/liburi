@@ -1,5 +1,8 @@
-/*
- * Copyright 2012 Mo McRoberts.
+/* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+ *
+ * Copyright 2014-2016 BBC
+ *
+ * Copyright 2012 Mo McRoberts
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,7 +17,7 @@
  *  limitations under the License.
  */
 
-#ifndef P_TESTSUITE_H_
+#ifndef P_TESTS_H_
 # define P_TESTSUITE_H_                 1
 
 # include <stdio.h>
@@ -28,6 +31,8 @@
 
 # define PASS                           0
 # define FAIL                           1
+# define HARDERR                        99
+# define SKIPPED                        77
 
 # define UM_NONE                        0
 # define UM_SCHEME_LEN                  (1<<0)
@@ -76,8 +81,7 @@ struct urimatch
 	unsigned long testmask;
 };
 
-extern int test_urimatch(const char *file, struct urimatch *matches);
+extern int test_urimatch(const char *restrict file, struct urimatch *restrict matches);
+extern int test_recomposed(const char *restrict file, const char *restrict src, const char *restrict expected, URI *restrict base);
 
-extern int test_parse_http_1(void);
-
-#endif /*!P_TESTSUITE_H_*/
+#endif /*!P_TESTS_H_*/

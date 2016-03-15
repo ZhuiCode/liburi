@@ -1,5 +1,8 @@
-/*
- * Copyright 2012 Mo McRoberts.
+/* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+ *
+ * Copyright 2014-2016 BBC
+ *
+ * Copyright 2012 Mo McRoberts
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,7 +21,7 @@
 # include "config.h"
 #endif
 
-#include "p_testsuite.h"
+#include "lib/p_tests.h"
 
 /* Parse a selection of URIs and test the results */
 
@@ -54,7 +57,7 @@ static struct urimatch tests[] = {
 };
 
 int
-test_parse_http_1(void)
+main(void)
 {
 	return test_urimatch(__FILE__, tests);
 }

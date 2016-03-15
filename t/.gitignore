@@ -1,1 +1,5 @@
-/run-tests
+*.log
+*.trs
+/anchor
+/file-http-base
+/parse-http

@@ -64,8 +64,7 @@ SUFFIXES = .3.xml .3.html .3 .1.xml .1.html .1
 	$(XML2MAN) $<
 
 test:
-	$(MAKE) -C t
-	t/run-tests
+	$(MAKE) check
 
 BRANCH ?= develop
 
