@@ -1,5 +1,6 @@
 *.log
 *.trs
+/run-tests
 /anchor
 /file-http-base
 /parse-http
