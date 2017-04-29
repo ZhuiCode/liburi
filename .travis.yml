@@ -2,4 +2,4 @@ language: c
 before_install:
 - sudo apt-get update -qq
 - sudo apt-get install -qq automake autoconf libtool
-- autoreconf -f -i
+script: autoreconf -f -i && ./configure && make && make check
