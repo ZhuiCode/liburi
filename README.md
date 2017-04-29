@@ -46,17 +46,17 @@ the changes you’ve made.
 
 ## License
 
+**uriparser** is licensed under the [New BSD license](http://uriparser.git.sourceforge.net/git/gitweb.cgi?p=uriparser/uriparser;a=blob;f=COPYING).
+
+* Copyright © 2007 Weijia Song - <songweijia@gmail.com>
+* Copyright © 2007 Sebastian Pipping - <sebastian@pipping.org>
+
 **liburi** is licensed under the terms of the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 * Copyright © 2012 Mo McRoberts
 * Copyright © 2014-2017 BBC
 
-**uriparser** is licensed under the [New BSD license](http://uriparser.git.sourceforge.net/git/gitweb.cgi?p=uriparser/uriparser;a=blob;f=COPYING).
-
-* Copyright © 2007, Weijia Song <songweijia@gmail.com>
-* Copyright © 2007, Sebastian Pipping <sebastian@pipping.org>
-
 [travis]: https://img.shields.io/travis/bbcarchdev/liburi.svg
 [license]: https://img.shields.io/badge/license-Apache%202.0-blue.svg
-[language]: https://img.shields.io/badge/Language-C-yellow.svg 
+[language]: https://img.shields.io/badge/implemented%20in-C-yellow.svg 
 [twitter]: https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Follow%20@RES_Project
