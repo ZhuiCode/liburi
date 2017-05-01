@@ -17,6 +17,7 @@ This software was developed as part of the [Research & Education Space project](
 ## Table of Contents
 
 * [Requirements](#requirements)
+* [Using liburi](#using-liburi)
 * [Bugs and feature requests](#bugs-and-feature-requests)
 * [Building from source](#building-from-source)
 * [Automated builds](#automated-builds)
@@ -29,10 +30,29 @@ This software was developed as part of the [Research & Education Space project](
 There are no special build requirements; a working C compiler and build
 environment will be sufficient.
 
-liburi has not yet been ported to non-Unix-like environments, although it ought to build inside Cygwin.
+liburi has not yet been ported to non-Unix-like environments, and will install
+as a shared library on macOS rather than a framework, and it ought to build
+inside Cygwin.
+
+[Contributions](#contributing) for building properly as a DLL with Visual
+Studio or a framework with Xcode and so on are welcome.
 
 See also the additional requirements when [building from source](#building-from-source).
 
+## Using liburi
+
+The public interface to liburi is in [`liburi.h`](liburi.h). You should link
+your program with `-luri`. Both the header and library will be installed in
+`/usr/local` unless a different prefix is specified when building, and so you
+may need to provide a corresponding `-I` flag to your compiler and `-L` flag to
+your linker.
+
+Parse URIs with `uri_create_str()`; destroy them with `uri_destroy()`; obtain
+information about them with `uri_info()`; and reconstitute them into strings
+with `uri_str()`.
+
+A more complete and detailed function reference is provided in DocBook 5 format,
+along with generated Unix (`nroff`) manual page and HTML versions.
 
 ## Bugs and feature requests
 
