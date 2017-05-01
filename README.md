@@ -81,6 +81,13 @@ We have configured [Travis](https://travis-ci.org/bbcarchdev/liburi) to automati
 
 You may wish to do similar for your own forks, if you intend to maintain them.
 
+The [`debian`](debian) directory contains the logic required to build a Debian
+package for liburi, except for the `changelog`. This is used by the system
+that auto-deploys packages for the production [Research & Education Space](https://bbcarchdev.github.io/res/),
+and so if you need a modified version to suit your own deployment needs,
+it’s probably easiest to maintain a fork of this repository with your changes
+in.
+
 ## Contributing
 
 If you’d like to contribute to liburi, [fork this repository](https://github.com/bbcarchdev/liburi/fork) and commit your changes to the
