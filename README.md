@@ -7,19 +7,21 @@ A library for parsing URIs and IRIs.
 ![Implemented in C][language]
 [![Follow @RES_Project][twitter]](https://twitter.com/RES_Project)
 
-[liburi](https://github.com/bbcarchdev/liburi) is a simple interface for parsing
+[liburi](https://github.com/bbcarchdev/liburi) is a library with simple interface for parsing
 URIs. Under the hood, the actual URI parsing is handled by a bundled version of
 [uriparser](http://uriparser.sourceforge.net/)—liburi aims to provide
 an API which is easier to work with than uriparser's own.
 
-This software was developed as part of the [Research & Education Space project](https://bbcarchdev.github.io/res/).
+This software was developed as part of the [Research & Education Space project](https://bbcarchdev.github.io/res/) and is actively maintained by a development team within BBC Design and Engineering. We hope you’ll find this project useful!
 
 ## Table of Contents
 
 * [Requirements](#requirements)
-* [Information for BBC Staff](#information-for-bbc-staff)
+* [Bugs and feature requests](#bugs-and-feature-requests)
 * [Building from source](#building-from-source)
+* [Automated builds](#automated-builds)
 * [Contributing](#contributing)
+* [Information for BBC Staff](#information-for-bbc-staff)
 * [License](#license)
 
 ## Requirements
@@ -27,20 +29,15 @@ This software was developed as part of the [Research & Education Space project](
 There are no special build requirements; a working C compiler and build
 environment will be sufficient.
 
-liburi has not been ported to non-Unix-like environments, although it should build inside Cygwin.
+liburi has not yet been ported to non-Unix-like environments, although it ought to build inside Cygwin.
 
 See also the additional requirements when [building from source](#building-from-source).
 
-## Information for BBC Staff
 
-This is an open source project which is actively maintained and developed
-by a team within Design and Engineering. Please bear in mind the following:—
+## Bugs and feature requests
 
-* Bugs and feature requests **must** be filed in [GitHub Issues](https://github.com/bbcarchdev/liburi/issues): this is the authoratitive list of backlog tasks.
-* Issues with the label [triaged](https://github.com/bbcarchdev/liburi/issues?q=is%3Aopen+is%3Aissue+label%3Atriaged) are 
-* [Forking](https://github.com/bbcarchdev/liburi/fork) is encouraged! See the “[Contributing](#contributing)” section.
-* Under **no** circumstances may you commit directly to this repository, even if you have push permission in GitHub.
-* If you’re joining the development team, contact *“Archive Development Operations”* in the GAL to request access to GitLab (although your line manager should have done this for you in advance).
+If you’ve found a bug, or have thought of a feature that you would like to
+see added, you can [file a new issue](https://github.com/bbcarchdev/liburi/issues). A member of the development team will triage it and add it to our internal prioritised backlog for development—but in the meantime we [welcome contributions](#contributing) and [encourage forking](https://github.com/bbcarchdev/liburi/fork).
 
 ## Building from source
 
@@ -58,16 +55,36 @@ minimal external dependencies.
     $ make check
     $ sudo make install
 
+## Automated builds
+
+We have configured [Travis](https://travis-ci.org/bbcarchdev/liburi) to automatically build and invoke the tests on liburi for new commits on each branch. See [`.travis.yml`](.travis.yml) for the details.
+
+You may wish to do similar for your own forks, if you intend to maintain them.
+
 ## Contributing
 
-To contribute to liburi, [fork this repository](https://github.com/bbcarchdev/liburi/fork) and commit your changes to the
+If you’d like to contribute to liburi, [fork this repository](https://github.com/bbcarchdev/liburi/fork) and commit your changes to the
 `develop` branch.
 
 For larger changes, you should create a feature branch with
 a meaningful name, for example one derived from the [issue number](https://github.com/bbcarchdev/liburi/issues/).
 
 Once you are satisfied with your contribution, open a pull request and describe
-the changes you’ve made.
+the changes you’ve made and a member of the development team will take a look.
+
+## Information for BBC Staff
+
+This is an open source project which is actively maintained and developed
+by a team within Design and Engineering. Please bear in mind the following:—
+
+* Bugs and feature requests **must** be filed in [GitHub Issues](https://github.com/bbcarchdev/liburi/issues): this is the authoratitive list of backlog tasks.
+* Issues with the label [triaged](https://github.com/bbcarchdev/liburi/issues?q=is%3Aopen+is%3Aissue+label%3Atriaged) have been prioritised and added to the team’s internal backlog for development. Feel free to comment on the GitHub Issue in either case!
+* You should never add nor remove the *triaged* label to yours or anybody else’s Github Issues.
+* [Forking](https://github.com/bbcarchdev/liburi/fork) is encouraged! See the “[Contributing](#contributing)” section.
+* Under **no** circumstances may you commit directly to this repository, even if you have push permission in GitHub.
+* If you’re joining the development team, contact *“Archive Development Operations”* in the GAL to request access to GitLab (although your line manager should have done this for you in advance).
+
+Finally, thanks for taking a look at this project! We hope it’ll be useful, do get in touch with us if we can help with anything (“RES-BBC” in the GAL, and we have staff in BC and PQ).
 
 ## License
 
