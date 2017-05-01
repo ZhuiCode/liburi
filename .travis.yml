@@ -12,7 +12,7 @@ before_install:
 - sudo add-apt-repository "deb [arch=amd64] https://apt.bbcarchdev.net/debian wheezy main ports dev stage live"
 - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
 - sudo apt-get update -qq
-- sudo apt-get install -qq automake autoconf libtool pkg-config xsltproc docbook-xml5 docbook-xsl-ns
+- sudo apt-get install -qq automake autoconf libtool pkg-config xsltproc docbook5-xml docbook-xsl-ns
 before_script:
 - autoreconf -f -i
 script:
