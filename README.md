@@ -31,8 +31,8 @@ There are no special build requirements; a working C compiler and build
 environment will be sufficient.
 
 liburi has not yet been ported to non-Unix-like environments, and will install
-as a shared library on macOS rather than a framework, and it ought to build
-inside Cygwin.
+as a shared library on macOS rather than a framework, but it ought to build
+inside Cygwin on Windows.
 
 [Contributions](#contributing) for building properly as a DLL with Visual
 Studio or a framework with Xcode and so on are welcome.
