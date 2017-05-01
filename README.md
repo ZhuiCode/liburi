@@ -84,7 +84,7 @@ by a team within Design and Engineering. Please bear in mind the following:—
 * Under **no** circumstances may you commit directly to this repository, even if you have push permission in GitHub.
 * If you’re joining the development team, contact *“Archive Development Operations”* in the GAL to request access to GitLab (although your line manager should have done this for you in advance).
 
-Finally, thanks for taking a look at this project! We hope it’ll be useful, do get in touch with us if we can help with anything (“RES-BBC” in the GAL, and we have staff in BC and PQ).
+Finally, thanks for taking a look at this project! We hope it’ll be useful, do get in touch with us if we can help with anything (*“RES-BBC”* in the GAL, and we have staff in BC and PQ).
 
 ## License
 
