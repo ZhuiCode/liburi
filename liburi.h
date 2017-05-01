@@ -1,3 +1,8 @@
+/* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+ * 
+ * Copyright 2014-2017 BBC
+ */
+
 /*
  * Copyright 2012 Mo McRoberts.
  *
