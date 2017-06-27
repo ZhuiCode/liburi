@@ -33,7 +33,7 @@ typedef struct uri_info_struct URI_INFO;
  */
 struct uri_info_struct
 {
-	void *internal;
+	void *reserved;
 	char *scheme;
 	char *auth;
 	char *host;
@@ -41,6 +41,12 @@ struct uri_info_struct
 	char *path;
 	char *query;
 	char *fragment;
+	char *user;
+	char *pass;
+	char **params;
+#ifdef P_LIBURI_H_
+	struct uri_info_internal_data_struct internal;
+#endif
 };
 
 # if (!defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L) && !defined(restrict)

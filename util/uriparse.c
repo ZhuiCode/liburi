@@ -1,6 +1,6 @@
 /* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
  *
- * Copyright (c) 2015 BBC
+ * Copyright (c) 2015-2017 BBC
  */
 
 /* Copyright 2012 Mo McRoberts.
@@ -38,14 +38,41 @@ static const char *basestr;
 static int verbose;
 static int printuri;
 static int omitempty;
+static int printquery = 1;
 
 static void parseargs(int argc, char **argv);
 static void usage(void);
 static URI *parseuris(void);
-static int printcomp(URI *uri, const char *name, size_t (*fn)(const URI *restrict, char *restrict, size_t), char **buffer, size_t *len);
+static int printcomp(URI *uri, const char *name, const char *buf);
 static int printesc(const char *string);
 static int print_uri(URI *uri);
 static int print_components(URI *uri);
+
+int
+main(int argc, char **argv)
+{
+	URI *uri;
+	int r;
+
+	setlocale(LC_ALL, "");
+	parseargs(argc, argv);
+	uri = parseuris();
+	if(!uri)
+	{
+		return 1;
+	}
+	if(printuri)
+	{
+		r = print_uri(uri);	
+	}
+	else
+	{
+		r = print_components(uri);
+	}
+	uri_destroy(uri);
+	return (r ? 1 : 0);
+}
+
 
 static void
 parseargs(int argc, char **argv)
@@ -82,6 +109,9 @@ parseargs(int argc, char **argv)
 		case 'o':
 			omitempty = 1;
 			break;
+		case 'q':
+			printquery = 0;
+			break;
 		default:
 			usage();
 			exit(EXIT_FAILURE);
@@ -115,7 +145,8 @@ usage(void)
 			"  -v                  Produce verbose output\n"
 			"  -p PREFIX           Prefix output variable names with PREFIX\n"
 			"  -u                  Print the parsed URI instead of components\n"
-		    "  -o                  Omit printing components which are absent\n");
+		    "  -o                  Omit printing components which are absent\n"
+			"  -q                  Omit print the query-string components\n");
 }
 
 static URI *
@@ -156,35 +187,11 @@ parseuris(void)
 }
 
 static int
-printcomp(URI *uri, const char *name, size_t (*fn)(const URI *restrict, char *restrict, size_t), char **buffer, size_t *len)
+printcomp(URI *uri, const char *name, const char *buf)
 {
-	size_t r;
-	char *p;
-
-	r = fn(uri, *buffer, *len);
-	if(r == (size_t) -1)
-	{
-		fprintf(stderr, "%s: failed to obtain %s: %s\n", short_program_name, name, strerror(errno));
-		return -1;
-	}
-	if(r > *len)
-	{
-		p = (char *) realloc(*buffer, r);
-		if(!p)
-		{
-			fprintf(stderr, "%s: failed to reallocate buffer from %lu to %lu bytes: %s\n", short_program_name, (unsigned long) *len, (unsigned long) r, strerror(errno));
-			return -1;
-		}
-		*buffer = p;
-		*len = r;
-		r = fn(uri, *buffer, *len);
-		if(r == (size_t) -1)
-		{
-			fprintf(stderr, "%s: failed to obtain %s: %s\n", short_program_name, name, strerror(errno));
-			return -1;
-		}
-	}
-	if(r == 0)
+	(void) uri;
+	
+	if(!buf || !buf[0])
 	{
 		if(!omitempty)
 		{
@@ -193,7 +200,7 @@ printcomp(URI *uri, const char *name, size_t (*fn)(const URI *restrict, char *re
 		return 0;
 	}	
 	printf("%s%s=\"", prefix, name);
-	printesc(*buffer);
+	printesc(buf);
 	puts("\"");
 	return 0;
 }
@@ -258,67 +265,71 @@ print_uri(URI *uri)
 static int
 print_components(URI *uri)
 {
-	size_t len;
-	char *buffer;
+	URI_INFO *info;
+	size_t len, c;
 	int r;
 
+	info = uri_info(uri);
+	if(!info)
+	{
+		fprintf(stderr, "%s: failed to obtain information about the URI: %s\n", short_program_name, strerror(errno));
+		return 0;
+	}
 	r = 0;
 	len = 0;
-	buffer = NULL;
-	if(printcomp(uri, "scheme", uri_scheme, &buffer, &len) == -1)
+	if(printcomp(uri, "scheme", info->scheme) == -1)
 	{
 		r = -1;
 	}
-	if(printcomp(uri, "auth", uri_auth, &buffer, &len) == -1)
+	if(printcomp(uri, "auth", info->auth) == -1)
 	{
 		r = -1;
 	}
-	if(printcomp(uri, "host", uri_host, &buffer, &len) == -1)
+	if(printcomp(uri, "user", info->user) == -1)
 	{
 		r = -1;
 	}
-	if(printcomp(uri, "port", uri_port, &buffer, &len) == -1)
+	if(printcomp(uri, "pass", info->pass) == -1)
 	{
 		r = -1;
 	}
-	if(printcomp(uri, "path", uri_path, &buffer, &len) == -1)
+	if(info->port)
+	{
+		printf("%sport=%d\n", prefix, info->port);
+	}
+	if(printcomp(uri, "path", info->path) == -1)
 	{
 		r = -1;
 	}
-	if(printcomp(uri, "query", uri_query, &buffer, &len) == -1)
+	if(printcomp(uri, "query", info->query) == -1)
 	{
 		r = -1;
 	}
-	if(printcomp(uri, "fragment", uri_fragment, &buffer, &len) == -1)
+	if(printquery)
+	{
+		for(c = 0; info->params && info->params[c]; c += 2)
+		{
+			if(!info->params[c + 1][0])
+			{
+				if(!omitempty)
+				{
+					printf("%sparams[\"", prefix);
+					printesc(info->params[c]);
+					puts("\"]=''");
+					continue;
+				}
+			}
+			printf("%sparams[\"", prefix);
+			printesc(info->params[c]);
+			printf("\"]=\"");
+			printesc(info->params[c + 1]);
+			puts("\"");
+		}
+	}
+	if(printcomp(uri, "fragment", info->fragment) == -1)
 	{
 		r = -1;
 	}
-	free(buffer);
-
+	uri_info_destroy(info);
 	return 0;
-}
-
-int
-main(int argc, char **argv)
-{
-	URI *uri;
-	int r;
-
-	setlocale(LC_ALL, "");
-	parseargs(argc, argv);
-	uri = parseuris();
-	if(!uri)
-	{
-		return 1;
-	}
-	if(printuri)
-	{
-		r = print_uri(uri);	
-	}
-	else
-	{
-		r = print_components(uri);
-	}
-	uri_destroy(uri);
-	return (r ? 1 : 0);
 }

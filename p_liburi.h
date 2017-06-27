@@ -31,6 +31,13 @@
 
 # include "Uri.h"
 
+struct uri_info_internal_data_struct
+{
+	char *buffer;
+	size_t nparams;
+	size_t nalloc;
+};
+
 # include "liburi.h"
 
 struct uri_struct

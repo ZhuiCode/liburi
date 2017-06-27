@@ -27,6 +27,9 @@
 
 static ssize_t uri_get_(const UriTextRangeA *restrict range, char *restrict buf, size_t bufsize);
 static int uri_addch_(int ch, char *restrict *restrict buf, size_t *restrict buflen);
+static int uri_info_parseauth_(URI_INFO *info);
+static int uri_info_parseparams_(URI_INFO *info);
+static int uri_info_param_add_(URI_INFO *info, const char *key, const char *value);
 
 size_t
 uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
@@ -217,7 +220,7 @@ uri_info(const URI *uri)
 		free(p);
 		return NULL;
 	}
-	p->internal = buf;
+	p->internal.buffer = buf;
 #define getbuf(component, member)						\
 	r = uri_get_(&(uri->uri.component), buf, buflen);	\
 	if(r)												\
@@ -240,8 +243,9 @@ uri_info(const URI *uri)
 	}
 	getbuf(query, query);
 	getbuf(fragment, fragment);
-
-#undef getbuf  
+#undef getbuf
+	uri_info_parseauth_(p);
+	uri_info_parseparams_(p);
 	return p;
 }
 	
@@ -249,7 +253,9 @@ uri_info(const URI *uri)
 int
 uri_info_destroy(URI_INFO *info)
 {
-	free(info->internal);
+	free(info->internal.buffer);
+	free(info->user);
+	free(info->pass);
 	free(info);
 	return 0;
 }
@@ -306,4 +312,199 @@ uri_addch_(int ch, char *restrict *restrict buf, size_t *restrict buflen)
 		(*buflen)--;
 	}
 	return 1;
+}
+
+/* Parse info->auth into info->user and info->pass */
+static int
+uri_info_parseauth_(URI_INFO *info)
+{
+	int n;
+	const char *s;
+	char *p;
+	
+	if(!info->auth)
+	{
+		return 0;
+	}
+	info->user = strdup(info->auth);
+	if(!info->user)
+	{
+		return -1;
+	}
+	p = info->user;
+	for(s = info->auth; *s && *s != ':'; s++)
+	{
+		if(*s == '%')
+		{
+			if(isxdigit(s[1]) && isxdigit(s[2]))
+			{
+				if(s[1] >= '0' && s[1] <= '9')
+				{
+					n = s[1] - '0';
+				}
+				else
+				{
+					n = 10 + tolower(s[1]) - 'a';
+				}
+				n <<= 4;
+				if(s[2] >= '0' && s[2] <= '9')
+				{
+					n |= s[2] - '0';
+				}
+				else
+				{
+					n |= 10 + tolower(s[2]) - 'a';
+				}
+				*p = n;
+				p++;
+				s += 2;
+				continue;
+			}
+		}
+		*p = *s;
+		p++;
+	}
+	*p = 0;
+	if(*s == ':')
+	{
+		info->pass = strdup(s);
+		if(!info->pass)
+		{
+			return -1;
+		}
+		p = info->pass;
+		for(s++; *s; s++)
+		{
+			if(*s == '%')
+			{
+				if(isxdigit(s[1]) && isxdigit(s[2]))
+				{
+					if(s[1] >= '0' && s[1] <= '9')
+					{
+						n = s[1] - '0';
+					}
+					else
+					{
+						n = 10 + tolower(s[1]) - 'a';
+					}
+					n <<= 4;
+					if(s[2] >= '0' && s[2] <= '9')
+					{
+						n |= s[2] - '0';
+					}
+					else
+					{
+						n |= 10 + tolower(s[2]) - 'a';
+					}
+					*p = n;
+					p++;
+					s += 2;
+					continue;
+				}
+			}
+			*p = *s;
+			p++;			
+		}
+		*p = 0;
+	}
+	return 0;
+}
+
+/* Parse info->query into info->params[] */
+static int
+uri_info_parseparams_(URI_INFO *info)
+{
+	const char *s, *t, *key, *value;
+	char *qbuf, *p;
+	char cbuf[3];
+	
+	if(!info->query)
+	{
+		return 0;
+	}
+	qbuf = (char *) calloc(1, strlen(info->query) + 1);
+	if(!qbuf)
+	{
+		return -1;
+	}
+	p = qbuf;
+	s = info->query;
+	while(s)
+	{
+		key = p;
+		value = NULL;
+		t = strchr(s, '&');
+		while(*s &&(!t || s < t))
+		{
+			if(*s == '=')
+			{
+				*p = 0;
+				p++;
+				s++;
+				value = p;
+				continue;
+			}
+			if(*s == '%')
+			{
+				if(isxdigit(s[1])  && isxdigit(s[2]))
+				{
+					cbuf[0] = s[1];
+					cbuf[1] = s[2];
+					cbuf[2] = 0;
+					*p = (char) ((unsigned char) strtol(cbuf, NULL, 16));
+					p++;
+					s += 3;
+					continue;
+				}
+			}
+			*p = *s;
+			p++;
+			s++;
+		}
+		*p = 0;
+		p++;
+		if(value)
+		{
+			uri_info_param_add_(info, key, value);
+		}
+		if(t)
+		{
+			t++;
+		}
+		s = t;
+	}
+	free(qbuf);
+	return 0;
+}
+
+static int
+uri_info_param_add_(URI_INFO *info, const char *key, const char *value)
+{
+	char **p;
+	size_t n;
+	
+	if(!value)
+	{
+		value = "";
+	}
+	if(info->internal.nparams + 1 >= info->internal.nalloc)
+	{
+		/* Allocate in chunks of four parameters at a time plus sentinels */
+		p = (char **) realloc(info->params, sizeof(char *) * (info->internal.nalloc + 5) * 2);
+		if(!p)
+		{
+			return -1;
+		}
+		info->params = p;
+		info->internal.nalloc += 4;
+	}
+	n = info->internal.nparams * 2;
+	info->params[n] = strdup(key);
+	info->params[n + 1] = strdup(value);
+	if(!info->params[info->internal.nparams] || !info->params[info->internal.nparams + 1])
+	{
+		return -1;
+	}
+	info->internal.nparams++;
+	return 0;
 }
