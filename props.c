@@ -260,6 +260,38 @@ uri_info_destroy(URI_INFO *info)
 	return 0;
 }
 
+/* Obtain a parameter from a URI_INFO structure */
+const char *
+uri_info_get(URI_INFO *info, const char *key, const char *defval)
+{
+	size_t c;
+	
+	for(c = 0; info->params && info->params[c]; c += 2)
+	{
+		if(!strcmp(key, info->params[c]))
+		{
+			return info->params[c + 1];
+		}
+	}
+	return defval;
+}
+
+/* Obtain a parameter from a URI_INFO structure */
+intmax_t
+uri_info_get_int(URI_INFO *info, const char *key, intmax_t defval)
+{
+	size_t c;
+	
+	for(c = 0; info->params && info->params[c]; c += 2)
+	{
+		if(!strcmp(key, info->params[c]))
+		{
+			return strtoimax(info->params[c + 1], NULL, 10);
+		}
+	}
+	return defval;
+}
+
 /* Compare two URIs and test for equality */
 int
 uri_equal(const URI *a, const URI *b)

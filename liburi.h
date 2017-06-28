@@ -22,6 +22,7 @@
 #ifndef LIBURI_H_
 # define LIBURI_H_                      1
 
+# include <inttypes.h>
 # include <sys/types.h>
 
 typedef struct uri_struct URI;
@@ -112,6 +113,10 @@ extern "C" {
 	
 	/* Free a URI_INFO structure */
 	int uri_info_destroy(URI_INFO *info);
+	
+	/* Obtain query-string parameters from a URI_INFO structure */
+	const char *uri_info_get(URI_INFO *info, const char *key, const char *defval);
+	intmax_t uri_info_get_int(URI_INFO *info, const char *key, intmax_t defval);
 
 	/* Compare two URIs and test for equality */
 	int uri_equal(const URI *a, const URI *b);
