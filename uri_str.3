@@ -1,0 +1,142 @@
+'\" t
+.\"     Title: uri_str
+.\"    Author: Mo McRoberts
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 12/05/2012
+.\"    Manual: URI Functions
+.\"    Source: System Programmer's Manual
+.\"  Language: English
+.\"
+.TH "URI_STR" "3" "12/05/2012" "System Programmer's Manual" "URI Functions"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+uri_str \- recompose a URI
+.SH "LIBRARY"
+.PP
+URI parsing library (liburi, \-luri)
+.SH "SYNOPSIS"
+.sp
+.ft B
+.nf
+#include <liburi\&.h>
+.fi
+.ft
+.HP \w'size_t\ uri_str('u
+.BI "size_t uri_str(URI\ *restrict\ " "uri" ", char\ *\ " "buffer" ", size_t\ " "size" ");"
+.SH "DESCRIPTION"
+.PP
+The
+\fBuri_str\fR
+function recomposes a URI from its constiuent parts and copies the result into a supplied buffer\&.
+.PP
+Note that a recomposed URI may be longer than the string the URI was originally parsed from\&.
+.SH "PARAMETERS"
+.PP
+\fIuri\fR
+.RS 4
+The source URI to recompose\&.
+.RE
+.PP
+\fIbuffer\fR
+.RS 4
+The buffer to store the recomposed URI string in\&.
+\fIbuffer\fR
+may be
+\fBNULL\fR
+to simply obtain the return value\&.
+.sp
+The string stored in
+\fIbuffer\fR
+will always be
+\fBNULL\fR\-terminated, even if the buffer is not large enough to hold the entire string, provided
+\fIbuffer\fR
+is not\-NULL and
+\fIsize\fR
+is non\-zero\&.
+.RE
+.PP
+\fIsize\fR
+.RS 4
+The size of
+\fIbuffer\fR, in bytes\&.
+.RE
+.SH "RETURN VALUE"
+.PP
+If successful,
+\fBuri_str\fR
+returns the total number of bytes required to store the recomposed URI, including the
+\fBNULL\fR
+terminator (that is, one greater than the length of the string measured in bytes)\&. This return will occur whether a buffer is supplied or not, and regardless of its size\&.
+.PP
+If an error occurs,
+\fBuri_str\fR
+returns
+(size_t) \-1, and sets
+\fIerrno\fR
+accordingly\&.
+.PP
+An application can invoke
+\fBuri_str\fR, passing
+\fBNULL\fR
+as
+\fIbuffer\fR
+and
+0
+as
+\fIsize\fR
+in order to obtain the size of buffer required for a subsequent call\&.
+.PP
+Alternatively, if
+\fIbuffer\fR
+was non\-\fBNULL\fR, an application can compare the return value with the supplied
+\fIsize\fR
+in order to to determine whether the copied string was truncated: if the return value is less than or equal to
+\fIsize\fR, truncation did not occur\&.
+.SH "EXAMPLE"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+#define BUFFER_SIZE 64
+	  
+URI *uri;
+char buffer[BUFFER_SIZE];
+size_t r;
+
+uri = uri_create_str("HTTP://example\&.com/foo/\&.\&./ bar", NULL);
+r = uri_str(uri, buffer, BUFFER_SIZE);
+
+/* assuming no errors have occurred, buffer will contain
+ * \*(Aqhttp://example\&.com/%20bar\*(Aq and r will be 26\&.
+ */
+printf("buffer=\*(Aq%s\*(Aq, r=%lu\en", buffer, (unsigned long) r);
+	
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SEE ALSO"
+.PP
+
+\fBliburi\fR(3),
+\fBuri_create_str\fR(3),
+\fBuri_create_uri\fR(3)\&.

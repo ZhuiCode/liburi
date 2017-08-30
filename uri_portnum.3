@@ -1,0 +1,95 @@
+'\" t
+.\"     Title: uri_portnum
+.\"    Author: Mo McRoberts
+.\" Generator: DocBook XSL Stylesheets v1.77.1 <http://docbook.sf.net/>
+.\"      Date: 12/06/2012
+.\"    Manual: URI Functions
+.\"    Source: System Programmer's Manual
+.\"  Language: English
+.\"
+.TH "URI_PORTNUM" "3" "12/06/2012" "System Programmer's Manual" "URI Functions"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+uri_portnum \- obtain a URI\*(Aqs port number
+.SH "LIBRARY"
+.PP
+URI parsing library (liburi, \-luri)
+.SH "SYNOPSIS"
+.sp
+.ft B
+.nf
+#include <liburi\&.h>
+.fi
+.ft
+.HP \w'int\ uri_portnum('u
+.BI "int uri_portnum(URI\ *" "uri" ");"
+.SH "DESCRIPTION"
+.PP
+The
+\fBuri_portnum\fR
+returns the port number from a URI\&.
+.SH "PARAMETERS"
+.PP
+\fIuri\fR
+.RS 4
+The source URI to retrieve the port number from\&.
+.RE
+.SH "RETURN VALUE"
+.PP
+If the URI has a port number, its value will be returned\&. The port number can be any integer which is greater than or equal to zero\&.
+.PP
+If an error occurs,
+\fBuri_portnum\fR
+returns
+\-1, and sets
+\fIerrno\fR
+accordingly\&.
+.PP
+If the URI does not have a port number,
+\fBuri_portnum\fR
+returns
+0\&. To distinguish between an absent port number and a port number being specified as
+0, call and check the return value of
+\fBuri_port\fR(3)\&.
+.SH "EXAMPLE"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+URI *uri;
+int r;
+
+uri = uri_create_str("http://example\&.com:21/", NULL);
+r = uri_portnum(uri);
+
+/* assuming no errors have occurred, r will be 21 */
+printf("r=%d\en", r);
+	
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SEE ALSO"
+.PP
+
+\fBliburi\fR(3),
+\fBuri_port\fR(3)\&.
