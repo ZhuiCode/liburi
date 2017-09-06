@@ -1,5 +1,5 @@
 /* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
- * 
+ *
  * Copyright 2014-2017 BBC
  */
 
@@ -25,10 +25,10 @@
 # include <inttypes.h>
 # include <sys/types.h>
 
-#ifndef URI_STRUCT_DEFINED
-# define URI_STRUCT_DEFINED
+# ifndef URI_TYPE_DEFINED
+#  define URI_TYPE_DEFINED
 typedef struct uri_struct URI;
-#endif
+# endif
 
 typedef struct uri_info_struct URI_INFO;
 
