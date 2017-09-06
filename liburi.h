@@ -25,7 +25,10 @@
 # include <inttypes.h>
 # include <sys/types.h>
 
+#ifndef URI_STRUCT_DEFINED
+# define URI_STRUCT_DEFINED
 typedef struct uri_struct URI;
+#endif
 
 typedef struct uri_info_struct URI_INFO;
 
