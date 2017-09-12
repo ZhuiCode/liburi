@@ -12,8 +12,8 @@
 	  </author>
 	</authorgroup>
 	<copyright>
-	  <year>2012</year>
-	  <holder>Mo McRoberts</holder>
+	  <year>2017</year>
+	  <holder>BBC</holder>
 	</copyright>
   </info>
   
@@ -34,7 +34,7 @@
 
   <refsynopsisdiv>
 	<funcsynopsis>
-	  <funcsynopsisinfo>#include &lt;liburi.h&gt;</funcsynopsisinfo>
+	  <funcsynopsisinfo>#include &lt;URI.h&gt;</funcsynopsisinfo>
 	</funcsynopsis>
   </refsynopsisdiv>
   

@@ -24,22 +24,10 @@ doc_DATA = \
 	uri_absolute.3.html uri_absolute_path.3.html \
 	uri_str.3.html
 
-dist_man3_MANS = liburi.3 \
-	uri_create_str.3 uri_create_uri.3 uri_destroy.3 \
-	uri_scheme.3 uri_auth.3 uri_host.3 uri_port.3 \
-	uri_path.3 uri_query.3 uri_fragment.3 uri_portnum.3 \
-	uri_absolute.3 uri_absolute_path.3 \
-	uri_str.3
-
-SUFFIXES = .3.xml .3.html .3 .1.xml .1.html .1
+SUFFIXES = .3.xml .3.html .1.xml .1.html
 
 .1.xml.1.html:
 	$(XML2HTML) $< > $@
 
 .3.xml.3.html:
 	$(XML2HTML) $< > $@
-
-.1.xml.1:
-	$(XML2MAN) $<
-.3.xml.3:
-	$(XML2MAN) $<
