@@ -4,3 +4,7 @@
 [submodule "m4"]
 	path = m4
 	url = git://github.com/bbcarchdev/m4.git
+[submodule "docs"]
+	path = docs
+	url = git://github.com/bbcarchdev/liburi.git
+	branch = gh-pages

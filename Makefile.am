@@ -1,3 +1,7 @@
+## Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
+##
+## Copyright 2017 BBC
+
 ## Copyright 2012 Mo McRoberts.
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +16,11 @@
 ##  See the License for the specific language governing permissions and
 ##  limitations under the License.
 
-ACLOCAL_AMFLAGS = -I m4 -I .
+ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = uriparser . t util m4
+DIST_SUBDIRS = uriparser t util m4 docs man
+
+SUBDIRS = . t util m4 docs man
 
 DISTCLEANFILES = liburi.pc liburi-uninstalled.pc
 
@@ -22,53 +28,57 @@ pkgconfigdir = $(libdir)/pkgconfig
 
 pkgconfig_DATA = liburi.pc
 
-doc_DATA = README.md LICENSE-2.0 TODO \
-	liburi.3.html \
-	uri_create_str.3.html uri_create_uri.3.html uri_destroy.3.html \
-	uri_scheme.3.html uri_auth.3.html uri_host.3.html uri_port.3.html \
-	uri_path.3.html uri_query.3.html uri_fragment.3.html uri_portnum.3.html \
-	uri_absolute.3.html uri_absolute_path.3.html \
-	uri_str.3.html
+doc_DATA = README.md LICENSE-2.0 TODO
 
-dist_man3_MANS = liburi.3 \
-	uri_create_str.3 uri_create_uri.3 uri_destroy.3 \
-	uri_scheme.3 uri_auth.3 uri_host.3 uri_port.3 \
-	uri_path.3 uri_query.3 uri_fragment.3 uri_portnum.3 \
-	uri_absolute.3 uri_absolute_path.3 \
-	uri_str.3
+pkgincludedir = $(includedir)/$(PACKAGE_NAME)
+
+pkginclude_HEADERS = liburi.h URI.h
 
 lib_LTLIBRARIES = liburi.la
 
-include_HEADERS = liburi.h
-
 liburi_la_SOURCES = p_liburi.h \
-	parse.c props.c recompose.c
+	uri.c parse.c unicode.c fspath.c rebase.c props.c recompose.c
 
-liburi_la_CPPFLAGS = -I$(srcdir)/uriparser/include/uriparser
-
+liburi_la_CPPFLAGS = -I$(srcdir)/uriparser/include
 liburi_la_LDFLAGS = -avoid-version -export-symbols-regex '^uri_[a-z]'
+liburi_la_LIBADD = liburiparser.la
 
-liburi_la_LIBADD = uriparser/liburiparser.la
+## Build a static version of liburiparser to embed within liburi
 
-SUFFIXES = .3.xml .3.html .3 .1.xml .1.html .1
+noinst_LTLIBRARIES = liburiparser.la
 
-.1.xml.1.html:
-	$(XML2HTML) $< > $@
+liburiparser_la_SOURCES = \
+	uriparser/src/UriCommon.c \
+	uriparser/src/UriCommon.h \
+	uriparser/src/UriCompare.c \
+	uriparser/src/UriEscape.c \
+	uriparser/src/UriFile.c \
+	uriparser/src/UriIp4.c \
+	uriparser/src/UriIp4Base.c \
+	uriparser/src/UriIp4Base.h \
+	uriparser/src/UriNormalize.c \
+	uriparser/src/UriNormalizeBase.c \
+	uriparser/src/UriNormalizeBase.h \
+	uriparser/src/UriParse.c \
+	uriparser/src/UriParseBase.c \
+	uriparser/src/UriParseBase.h \
+	uriparser/src/UriQuery.c \
+	uriparser/src/UriRecompose.c \
+	uriparser/src/UriResolve.c \
+	uriparser/src/UriShorten.c
 
-.3.xml.3.html:
-	$(XML2HTML) $< > $@
-
-.1.xml.1:
-	$(XML2MAN) $<
-.3.xml.3:
-	$(XML2MAN) $<
+liburiparser_la_CPPFLAGS = -I$(top_srcdir)/uriparser/include
+liburiparser_la_LDFLAGS = -static
 
 test:
 	$(MAKE) check
 
-BRANCH ?= develop
+## Maintainer tools
 
+BRANCH ?= develop
+DOCS_BRANCH ?= gh-pages
 DEVELOP_SUBMODULES = m4
+DOCS_SUBMODULES = doc
 
 checkout:
 	@for submod in $(DEVELOP_SUBMODULES) ; do \
@@ -79,3 +89,6 @@ checkout:
 		$(MAKE) checkout BRANCH=$(BRANCH) || exit $? && \
 		cd .. ; \
 	done
+
+reconf:
+	(cd $(top_srcdir) && autoreconf -i ) && $(SHELL) $(top_builddir)/config.status --recheck && $(SHELL) $(top_builddir)/config.status

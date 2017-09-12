@@ -1,6 +1,6 @@
 /* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
  *
- * Copyright 2014-2017 BBC
+ * Copyright 2015-2017 BBC
  */
 
 /*
@@ -19,4 +19,33 @@
  *  limitations under the License.
  */
 
-#include "URI.h"
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#include "p_liburi.h"
+
+/* Create a file: URI for the current working directory */
+URI *
+uri_create_cwd(void)
+{
+	char *pathbuf;
+	URI *uri;
+	
+	pathbuf = (char *) calloc(1, 7 + PATH_MAX + 2);
+	if(!pathbuf)
+	{
+		return NULL;
+	}
+	strcpy(pathbuf, "file://");
+	if(!getcwd(&(pathbuf[7]), PATH_MAX + 1))
+	{
+		free(pathbuf);
+		return NULL;
+	}
+	pathbuf[strlen(pathbuf)] = '/';
+	/* XXX encode special characters in the path */
+	uri = uri_create_str(pathbuf, NULL);
+	free(pathbuf);
+	return uri;
+}

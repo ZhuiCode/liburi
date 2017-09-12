@@ -1,6 +1,6 @@
 ## Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
 ##
-## Copyright 2014-2015 BBC.
+## Copyright 2014-2017 BBC.
 
 ## Copyright 2012 Mo McRoberts.
 ##
@@ -21,7 +21,7 @@ PACKAGE_DESC="URI parsing library"
 AC_SUBST([PACKAGE_DESC])
 
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_AUX_DIR([.])
+AC_CONFIG_AUX_DIR([scripts])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_MAINTAINER_MODE
 
@@ -50,6 +50,8 @@ m4/Makefile
 util/Makefile
 t/Makefile
 t/lib/Makefile
+docs/Makefile
+man/Makefile
 liburi.pc
 liburi-uninstalled.pc
 ])

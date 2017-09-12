@@ -1,6 +1,6 @@
 /* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
  *
- * Copyright 2015 BBC
+ * Copyright 2015-2017 BBC
  */
 
 /*
@@ -25,223 +25,42 @@
 
 #include "p_liburi.h"
 
-static size_t
-uri_wctoutf8_(int *dest, wchar_t ch)
-{
-	if(ch < 0x7f)
-	{
-		dest[0] = ch;
-		return 1;
-	}
-	if(ch < 0x07ff)
-	{
-		/* 110aaaaa 10bbbbbb */
-		dest[0] = 0xc0 | ((ch & 0x0007c0) >>  6);
-		dest[1] = 0x80 | (ch & 0x00003f);
-		return 2;
-	}
-	if(ch < 0xffff)
-	{
-		/* 1110aaaa 10bbbbbb 10cccccc */
-		dest[0] = 0xe0 | ((ch & 0x00f000) >> 12);
-		dest[1] = 0x80 | ((ch & 0x000fc0) >> 6);
-		dest[2] = 0x80 | (ch & 0x00003f);
-		return 3;
-	}
-	/* 11110aaa 10bbbbbb 10cccccc 10dddddd */
-	dest[0] = 0xf0 | ((ch & 0x1c0000) >> 18);
-	dest[1] = 0x80 | ((ch & 0x03f000) >> 12);
-	dest[2] = 0x80 | ((ch & 0x000fc0) >>  6);
-	dest[3] = 0x80 | (ch & 0x00003f);
-	return 4;
-}
+static const char *uri_schemeend_(const char *str);
+static int uri_parse_nonhier_(URI *restrict dest, const char *uristr);
 
-static size_t
-uri_encode_wide_(char *dest, wchar_t ch)
-{
-	static const char hexdig[16] = {
-		'0', '1', '2', '3', '4', '5', '6', '7',
-		'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-	};
+static char *uri_range_copy_(UriTextRangeA *range);
+static int uri_range_set_(UriTextRangeA *range, const char *src, UriBool owner);
 
-	int utf8[6];
-	size_t l, c;
-	
-	l = uri_wctoutf8_(utf8, ch);
-	for(c = 0; c < l; c++)
-	{
-		*dest = '%';
-		dest++;
-		*dest = hexdig[utf8[c] >> 4];
-		dest++;
-		*dest = hexdig[utf8[c] & 15];
-		dest++;
-	}
-	return l * 3;
-}
-
-/* Scan the URI string for wide characters and return the maximum storage
- * needed for their UTF-8 encoding
+/* Create a URI from a 7-bit ASCII string, which we consider to be the
+ * native form.
+ * Use uri_create_str(), uri_create_wstr(), or uri_create_ustr() if the
+ * source string is not plain ASCII.
  */
-static size_t
-uri_widebytes_(const char *uristr, size_t nbytes)
-{
-	wchar_t ch;
-	int r;
-	const char *p;
-	size_t numwide;
-
-	mbtowc(&ch, NULL, 0);
-	numwide = 0;
-	for(p = uristr; *p;)
-	{
-		r = mbtowc(&ch, p, nbytes);
-		if(r <= 0)
-		{
-			return (size_t) -1;
-		}		
-		if(ch < 33 || ch > 127)
-		{
-			/* Account for the full 6 bytes of UTF-8: we can't assume that
-			 * the source string (and hence the return value of mbtowc()) is
-			 * itself UTF-8, as it's locale-dependent.
-			 */
-			numwide += 6;
-		}
-		p += r;
-	}
-	return numwide;
-}
-
-/*
- * Map a potential IRI to a URI, see section 3.1 of RFC3987, converting
- * from locale-specific multibyte encoding to wide characters as we do
- */
-static int
-uri_preprocess_(char *restrict buf, const char *restrict uristr, size_t nbytes)
-{
-	wchar_t ch;
-	char *bp;
-	int r;
-
-	mbtowc(&ch, NULL, 0);
-	r = 0;
-	for(bp = buf; nbytes && *uristr;)
-	{
-		r = mbtowc(&ch, uristr, nbytes);
-		if(r <= 0)
-		{
-			return -1;
-		}		
-		if(ch < 33 || ch > 127)
-		{			
-			bp += uri_encode_wide_(bp, ch);
-		}
-		else
-		{
-			*bp = ch;
-			bp++;
-		}
-		uristr += r;
-		nbytes -= r;
-	}
-	*bp = 0;
-	return 0;
-}
-
 URI *
-uri_create_cwd(void)
+uri_create_ascii(const char *restrict str, const URI *restrict base)
 {
-	char *pathbuf;
 	URI *uri;
-	
-	pathbuf = (char *) calloc(1, 7 + PATH_MAX + 2);
-	if(!pathbuf)
-	{
-		return NULL;
-	}
-	strcpy(pathbuf, "file://");
-	if(!getcwd(&(pathbuf[7]), PATH_MAX + 1))
-	{
-		free(pathbuf);
-		return NULL;
-	}
-	pathbuf[strlen(pathbuf)] = '/';
-	uri = uri_create_str(pathbuf, NULL);
-	free(pathbuf);
-	return uri;
-}
-	
-
-URI *
-uri_create_str(const char *restrict uristr, const URI *restrict base)
-{
 	UriParserStateA state;
-	UriUriA absolute;
-	URI *uri;
-	size_t l, numwide;
-	int r; 
-
-	uri = (URI *) calloc(1, sizeof(URI));
+	const char *t;
+	
+	uri = uri_create_();
 	if(!uri)
 	{
 		return NULL;
 	}
-	l = strlen(uristr) + 1;
-	numwide = uri_widebytes_(uristr, l);
-	if(numwide == (size_t) -1)
+	/* Deal with non-hierarchical URIs properly:
+	 * Scan the string for the end of the scheme, If the character immediately
+	 * following the colon is not a forward-slash, we consider the URI
+	 * non-hierarchical and parse it accordingly.
+	 */
+	t = uri_schemeend_(str);
+	if(t && t[0] && t[1] != '/')
 	{
-		uri_destroy(uri);
-		return NULL;
-	}
-	uri->buf = (char *) malloc(l + numwide * 3);
-	if(!uri->buf)
-	{
-		uri_destroy(uri);
-		return NULL;
-	}
-	r = uri_preprocess_(uri->buf, uristr, l);
-	if(r)
-	{
-		uri_destroy(uri);
-		return NULL;
-	}
-	state.uri = &(uri->uri);
-	if(uriParseUriA(&state, uri->buf) != URI_SUCCESS)
-	{
-		uri_destroy(uri);
-		return NULL;
-	}
-	if(base)
-	{
-		if(uriAddBaseUriA(&absolute, &(uri->uri), &(base->uri)) != URI_SUCCESS)
-		{
-			uriFreeUriMembersA(&absolute);
-			uri_destroy(uri);
-			return NULL;
-		}
-		uriFreeUriMembersA(&(uri->uri));
-		memcpy(&(uri->uri), &absolute, sizeof(UriUriA));
-	}
-	uriNormalizeSyntaxA(&(uri->uri));
-	return uri;
-}
-
-URI *
-uri_create_uri(const URI *restrict source, const URI *restrict base)
-{
-	URI *uri;
-	UriParserStateA state;
-	char *p;
-
-	uri = (URI *) calloc(1, sizeof(URI));
-	if(!uri)
-	{
-		return NULL;
-	}
-	if(base)
-	{
-		if(uriAddBaseUriA(&(uri->uri), &(source->uri), &(base->uri)) != URI_SUCCESS)
+		/* A scheme is present and the first character after the colon
+		 * is not slash
+		 */
+		uri->hier = 0;
+		if(uri_parse_nonhier_(uri, str))
 		{
 			uri_destroy(uri);
 			return NULL;
@@ -249,31 +68,151 @@ uri_create_uri(const URI *restrict source, const URI *restrict base)
 	}
 	else
 	{
-		uri->buf = uri_stralloc(source);
-		if(!uri->buf)
-		{
-			uri_destroy(uri);
-			return NULL;
-		}
+		uri->hier = 1;
 		state.uri = &(uri->uri);
-		if(uriParseUriA(&state, uri->buf) != URI_SUCCESS)
+		if(uriParseUriA(&state, str) != URI_SUCCESS)
 		{
 			uri_destroy(uri);
 			return NULL;
 		}
 	}
-	uriNormalizeSyntaxA(&(uri->uri));
+	if(uri_postparse_(uri) || uri_rebase(uri, base))
+	{
+		uri_destroy(uri);
+		return NULL;
+	}
 	return uri;
 }
 
-int
-uri_destroy(URI *uri)
+/* Internal: find the first character after the URI scheme; this function will
+ * therefore return either NULL, or a pointer to a colon.
+ */
+static const char *
+uri_schemeend_(const char *str)
 {
-	if(uri)
+	for(; str && *str; str++)
 	{
-		uriFreeUriMembersA(&(uri->uri));
-		free(uri->buf);
-		free(uri);
+		if(*str == ':')
+		{
+			return str;
+		}
+		/* These characters cannot appear within a scheme, and so
+		 * indicate that the scheme is absent.
+		 */
+		if(*str == '@' || *str == '/' || *str == '%')
+		{
+			break;
+		}
+	}
+	return NULL;
+}
+
+/* Internal: parse a non-hierarchical URI
+ * This is a URI in the form:
+ *
+ * scheme ':' authority ':' namespace-specific + '?' query + '#' + fragment
+ *
+ * The namespace-specific segment (NSS) is considered to be an opaque string.
+*/
+static int
+uri_parse_nonhier_(URI *restrict dest, const char *uristr)
+{
+	return -1;
+}
+
+/* Internal: perform post-parsing normalisation and manipulation of a URI */
+int
+uri_postparse_(URI *uri)
+{
+	uriNormalizeSyntaxA(&(uri->uri));
+	/* Copy the UriUriA text ranges into new buffers, then set the
+	 * ranges to point back to our new buffers. This means that the uriparser
+	 * APIs will still work on our UriUriA object, but we can manipulate the
+	 * components as needed.
+	 */
+	uri->scheme = uri_range_copy_(&(uri->uri.scheme));
+	uri_range_set_(&(uri->uri.scheme), uri->scheme, uri->uri.owner);
+	uri->auth = uri_range_copy_(&(uri->uri.userInfo));
+	uri_range_set_(&(uri->uri.userInfo), uri->auth, uri->uri.owner);
+	uri->hoststr = uri_range_copy_(&(uri->uri.hostText));
+	uri_range_set_(&(uri->uri.hostText), uri->hoststr, uri->uri.owner);
+	uri->portstr = uri_range_copy_(&(uri->uri.portText));
+	uri_range_set_(&(uri->uri.portText), uri->portstr, uri->uri.owner);
+	uri->query = uri_range_copy_(&(uri->uri.query));
+	uri_range_set_(&(uri->uri.query), uri->query, uri->uri.owner);
+	uri->fragment = uri_range_copy_(&(uri->uri.fragment));
+	uri_range_set_(&(uri->uri.fragment), uri->fragment, uri->uri.owner);
+	/* Copy the path data */
+	/* Copy the host data */
+	/* Parse the port number, if present */
+	uri->uri.owner = URI_FALSE;
+	return 0;
+}
+
+/* Internal: copy a UriTextRange to a newly-allocated buffer */
+static char *
+uri_range_copy_(UriTextRangeA *range)
+{
+	size_t l;
+	char *buf;
+	
+	if(range->first && range->afterLast)
+	{
+		l = range->afterLast - range->first + 1;
+	}
+	else if(range->first)
+	{
+		l = strlen(range->first) + 1;
+	}
+	else
+	{
+		errno = 0;
+		return NULL;
+	}
+	if(!l)
+	{
+		errno = 0;
+		return NULL;
+	}
+	buf = (char *) malloc(l);
+	if(!buf)
+	{
+		return NULL;
+	}
+	strncpy(buf, range->first, l);
+	buf[l - 1] = 0;
+	fprintf(stderr, "copied buffer [%s]\n", buf);
+	return buf;
+}
+
+/* Internal: free a UriTextRange if it's owned by the UriUri, and then
+ * set it to point to the supplied null-terminated string. Note that
+ * uri->owner must be set to URI_FALSE after calling this or else
+ * uriFreeUriMembersA() will free heap blocks it doesn't own.
+ * src may be NULL. owner must be uri->owner.
+ */
+static int
+uri_range_set_(UriTextRangeA *range, const char *src, UriBool owner)
+{
+	/* If the UriUri owns the range, and it's present, free it
+	 * before replacing. The owner flag must be cleared on the UriUri
+	 * instance after calling this function.
+	 */
+	if(owner && range->first && range->afterLast != range->first)
+	{
+		free((URI_CHAR *) range->first);
+	}
+	/* Set the range to point to the entire length of src (provided src
+	 * is non-NULL)
+	 */
+	range->first = src;
+	if(src)
+	{
+		range->afterLast = strchr(src, 0);
+	}
+	else
+	{
+		range->afterLast = NULL;
 	}
 	return 0;
-}	
+}

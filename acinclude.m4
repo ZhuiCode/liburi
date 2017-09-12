@@ -112,8 +112,10 @@ AM_CONDITIONAL([URI_GENERATE_DOC], [false])
 
 AM_CONDITIONAL([URI_TEST_ENABLED], [false])
 
+AM_CONDITIONAL([WIN32], [false])
+
 AC_CONFIG_FILES([
-uriparser/Makefile:uriparser-Makefile.in
+uriparser/Makefile
 uriparser/liburiparser.pc
 uriparser/doc/Makefile
 uriparser/doc/Doxyfile

@@ -8,4 +8,4 @@ Description: @PACKAGE_DESC@
 URL: @PACKAGE_URL@
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -luri
-Cflags: -I${includedir}
+Cflags: -I${includedir}/@PACKAGE@

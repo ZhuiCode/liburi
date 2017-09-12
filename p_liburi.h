@@ -1,6 +1,6 @@
 /* Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
  *
- * Copyright 2015 BBC
+ * Copyright 2015-2017 BBC
  */
 
 /*
@@ -29,7 +29,7 @@
 # include <errno.h>
 # include <limits.h>
 
-# include "Uri.h"
+# include "uriparser/Uri.h"
 
 struct uri_info_internal_data_struct
 {
@@ -38,12 +38,63 @@ struct uri_info_internal_data_struct
 	size_t nalloc;
 };
 
-# include "liburi.h"
+# include "URI.h"
 
 struct uri_struct
 {
+	/* A uriparser URI instance */
 	UriUriA uri;
-	char *buf;
+	char *buf; /* XXX this will go away */
+	/* Any of the below members may be NULL to indicate absence */
+	/* The URI scheme, e.g., 'http' */
+	char *scheme;
+	/* Authentication data - e.g., 'user:secret' */
+	char *auth;
+	/* The username portion of auth */
+	char *user;
+	/* The password portion of auth */
+	char *password;
+	/* The hostname, as a string */
+	char *hoststr;
+	/* The hostname as a structure */
+	struct UriHostDataStructA hostdata;
+	/* The port, as a string */
+	char *portstr;
+	/* The port parsed as an unsigned integer */
+	unsigned int port;
+	/* The combined auth, hoststr and portstr comprising the authority or
+	 * namespace identifier
+	 */
+	char *authority;
+	/* The namespace-specific segment of a non-hierarchical URI */
+	char *nss;
+	/* The path; the first segment points to the start of the buffer; the
+	 * remaining segments in the list point to sections within that same
+	 * buffer.
+	 */
+	UriPathSegmentA *pathfirst;
+	UriPathSegmentA *pathlast;
+	/* The current path pointer (used with uri_peek(), uri_consume() and
+	 * uri_rewind())
+	 */
+	UriPathSegmentA *pathcur;
+	/* The query-string */
+	char *query;
+	/* The fragment identifier */
+	char *fragment;
+	/* The complete URI in normalised form */
+	char *composed;
+	/* Is this URI absolute? */
+	int absolute;
+	/* Is this URI hierarchical? (http, file and ftp are; urn, tag and 
+	 * about aren't)
+	*/
+	int hier;
 };
+
+URI *uri_create_(void);
+URI *uri_dup_(const URI *src);
+int uri_reset_(URI *uri);
+int uri_postparse_(URI *uri);
 
 #endif /*!P_LIBURI_H_*/

@@ -41,7 +41,7 @@ main(int argc, char **argv)
 			puts(EXEC_PREFIX);
 			break;
 		case SHOW_CFLAGS:
-			printf("-I%s\n", INCLUDEDIR);
+			printf("-I%s/%s\n", INCLUDEDIR, PACKAGE_NAME);
 			break;
 		case SHOW_LIBS:
 			printf("-L%s -luri\n", LIBDIR);
