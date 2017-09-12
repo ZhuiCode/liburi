@@ -68,7 +68,6 @@ liburiparser_la_SOURCES = \
 	uriparser/src/UriShorten.c
 
 liburiparser_la_CPPFLAGS = -I$(top_srcdir)/uriparser/include
-liburiparser_la_LDFLAGS = -static
 
 test:
 	$(MAKE) check
