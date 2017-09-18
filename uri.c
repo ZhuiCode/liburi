@@ -110,10 +110,14 @@ uri_dup_(const URI *src)
 	URI_COPYSTR_(p, src, composed);
 #undef URI_COPYSTR_
 	/* Copy the host info */
+	uri_hostdata_copy_(&(p->hostdata), &(src->hostdata));
+	p->port = src->port;
 	/* Copy the path */
+	uri_path_copy_(p, src->pathfirst);
 	/* Copy the flags */
+	p->pathabs = src->pathabs;
 	/* Now set the UriUri members to point to the new strings */
-	
+	uri_postparse_set_(p);
 	return p;
 }
 
@@ -123,10 +127,29 @@ uri_dup_(const URI *src)
 int
 uri_reset_(URI *uri)
 {
+	UriPathSegmentA *seg, *next;
+
 	uriFreeUriMembersA(&(uri->uri));
 	free(uri->scheme);
-	uri->scheme = NULL;
-	free(uri->buf);
-	uri->buf = NULL;
+	free(uri->auth);
+	free(uri->user);
+	free(uri->password);
+	free(uri->hoststr);
+	free(uri->hostdata.ip4);
+	free(uri->hostdata.ip6);
+	free((char *) uri->hostdata.ipFuture.first);
+	free(uri->portstr);
+	free(uri->authority);
+	free(uri->nss);
+	for(seg = uri->pathfirst; seg; seg = next)
+	{
+		next = seg->next;
+		free((char *) seg->text.first);
+		free(seg);
+	}
+	free(uri->query);
+	free(uri->fragment);
+	free(uri->composed);
+	memset(uri, 0, sizeof(URI));
 	return 0;
 }

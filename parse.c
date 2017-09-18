@@ -28,8 +28,9 @@
 static const char *uri_schemeend_(const char *str);
 static int uri_parse_nonhier_(URI *restrict dest, const char *uristr);
 
-static char *uri_range_copy_(UriTextRangeA *range);
-static int uri_range_set_(UriTextRangeA *range, const char *src, UriBool owner);
+static char *uri_range_copy_(const UriTextRangeA *range);
+static int uri_range_set_(UriTextRangeA *restrict range, const char *restrict src);
+static int uri_path_copy_ref_(UriPathSegmentA **head, UriPathSegmentA **tail, const UriPathSegmentA *src);
 
 /* Create a URI from a 7-bit ASCII string, which we consider to be the
  * native form.
@@ -50,11 +51,11 @@ uri_create_ascii(const char *restrict str, const URI *restrict base)
 	}
 	/* Deal with non-hierarchical URIs properly:
 	 * Scan the string for the end of the scheme, If the character immediately
-	 * following the colon is not a forward-slash, we consider the URI
+	 * following the colon is not a slash, we consider the URI
 	 * non-hierarchical and parse it accordingly.
 	 */
 	t = uri_schemeend_(str);
-	if(t && t[0] && t[1] != '/')
+	if(t && t[0] && t[1] != '/' && t[1] != '\\')
 	{
 		/* A scheme is present and the first character after the colon
 		 * is not slash
@@ -99,7 +100,7 @@ uri_schemeend_(const char *str)
 		/* These characters cannot appear within a scheme, and so
 		 * indicate that the scheme is absent.
 		 */
-		if(*str == '@' || *str == '/' || *str == '%')
+		if(*str == '@' || *str == '/' || *str == '%' || *str == '\\')
 		{
 			break;
 		}
@@ -117,6 +118,7 @@ uri_schemeend_(const char *str)
 static int
 uri_parse_nonhier_(URI *restrict dest, const char *uristr)
 {
+	errno = EPERM;
 	return -1;
 }
 
@@ -129,29 +131,162 @@ uri_postparse_(URI *uri)
 	 * ranges to point back to our new buffers. This means that the uriparser
 	 * APIs will still work on our UriUriA object, but we can manipulate the
 	 * components as needed.
+	 *
+	 * The UriUriA's owner flag will be set to false, indicating that with the
+	 * exception of the ip4 and ip6 structs within its hostData, it does not
+	 * own any of the memory its text ranges point at.
 	 */
 	uri->scheme = uri_range_copy_(&(uri->uri.scheme));
-	uri_range_set_(&(uri->uri.scheme), uri->scheme, uri->uri.owner);
 	uri->auth = uri_range_copy_(&(uri->uri.userInfo));
-	uri_range_set_(&(uri->uri.userInfo), uri->auth, uri->uri.owner);
 	uri->hoststr = uri_range_copy_(&(uri->uri.hostText));
-	uri_range_set_(&(uri->uri.hostText), uri->hoststr, uri->uri.owner);
 	uri->portstr = uri_range_copy_(&(uri->uri.portText));
-	uri_range_set_(&(uri->uri.portText), uri->portstr, uri->uri.owner);
 	uri->query = uri_range_copy_(&(uri->uri.query));
-	uri_range_set_(&(uri->uri.query), uri->query, uri->uri.owner);
 	uri->fragment = uri_range_copy_(&(uri->uri.fragment));
-	uri_range_set_(&(uri->uri.fragment), uri->fragment, uri->uri.owner);
 	/* Copy the path data */
+	if(uri_path_copy_(uri, uri->uri.pathHead))
+	{
+		return -1;
+	}
 	/* Copy the host data */
+	if((uri->hostdata.ipFuture.first = uri_range_copy_(&(uri->uri.hostData.ipFuture))))
+	{
+		uri->hostdata.ipFuture.afterLast = strchr(uri->hostdata.ipFuture.first, 0);
+	}
+	if(uri_hostdata_copy_(&(uri->hostdata), &(uri->uri.hostData)))
+	{
+		return -1;
+	}
 	/* Parse the port number, if present */
+	if(uri->portstr)
+	{
+		uri->port = atoi(uri->portstr);
+		if(uri->port < 1 || uri->port > 65535)
+		{
+			uri->port = 0;
+		}
+	}
+	return uri_postparse_set_(uri);
+}
+
+/* Replace the members of a UriUriA with pointers to our own buffers
+ * excepting ip4 and ip6 within the hostData member, which is always
+ * duplicated.
+ */
+int
+uri_postparse_set_(URI *uri)
+{
+	uriFreeUriMembersA(&(uri->uri));
 	uri->uri.owner = URI_FALSE;
+	uri_range_set_(&(uri->uri.scheme), uri->scheme);
+	uri_range_set_(&(uri->uri.userInfo), uri->auth);
+	uri_range_set_(&(uri->uri.hostText), uri->hoststr);
+	uri_range_set_(&(uri->uri.portText), uri->portstr);
+	uri_range_set_(&(uri->uri.query), uri->query);
+	uri_range_set_(&(uri->uri.fragment), uri->fragment);
+	uri_range_set_(&(uri->uri.hostData.ipFuture), uri->hostdata.ipFuture.first);
+	uri_hostdata_copy_(&(uri->uri.hostData), &(uri->hostdata));
+	uri_path_copy_ref_(&(uri->uri.pathHead), &(uri->uri.pathTail), uri->pathfirst);
+	uri->uri.absolutePath = (uri->pathabs ? URI_TRUE : URI_FALSE);
+	return 0;
+}
+
+/* Internal: copy a UriHostData struct, allocating memory as needed */
+int
+uri_hostdata_copy_(struct UriHostDataStructA *restrict dest, const struct UriHostDataStructA *restrict src)
+{	
+	if(src->ip4)
+	{
+		dest->ip4 = (UriIp4 *) calloc(1, sizeof(UriIp4));
+		if(!dest->ip4)
+		{
+			return -1;
+		}
+		memcpy(dest->ip4, src->ip4, sizeof(UriIp4));
+	}
+	if(src->ip6)
+	{
+		dest->ip6 = (UriIp6 *) calloc(1, sizeof(UriIp6));
+		if(!dest->ip6)
+		{
+			return -1;
+		}
+		memcpy(dest->ip6, src->ip6, sizeof(UriIp6));
+	}
+	return 0;
+}
+
+/* Internal: copy a UriPath into our URI object */
+int
+uri_path_copy_(URI *uri, const UriPathSegmentA *head)
+{
+	UriPathSegmentA *seg, *prev;
+
+	prev = NULL;
+	uri->pathabs = (int) uri->uri.absolutePath;
+	for(; head; head = head->next)
+	{
+		seg = (UriPathSegmentA *) calloc(1, sizeof(UriPathSegmentA));
+		if(!seg)
+		{
+			return -1;
+		}
+		seg->text.first = uri_range_copy_(&(head->text));
+		if(seg->text.first)
+		{
+			seg->text.afterLast = strchr(seg->text.first, 0);
+		}
+		if(prev)
+		{
+			prev->next = seg;
+		}
+		else
+		{
+			uri->pathfirst = seg;
+		}
+		prev = seg;
+	}
+	uri->pathlast = prev;
+	uri->pathcur = uri->pathfirst;
+	return 0;
+}
+
+/* Internal: create a new chain of path segments referencing the
+ * strings in the source segment; this is used because even if
+ * UriUriA::owner is false, the segments themselves will still be
+ * freed by uriFreeUriMembersA().
+ */
+static int
+uri_path_copy_ref_(UriPathSegmentA **head, UriPathSegmentA **tail, const UriPathSegmentA *src)
+{
+	UriPathSegmentA *seg, *prev;
+
+	prev = NULL;
+	for(; src; src = src->next)
+	{
+		seg = (UriPathSegmentA *) calloc(1, sizeof(UriPathSegmentA));
+		if(!seg)
+		{
+			return -1;
+		}
+		seg->text.first = src->text.first;
+		seg->text.afterLast = src->text.afterLast;
+		if(prev)
+		{
+			prev->next = seg;
+		}
+		else
+		{
+			*head = seg;
+		}
+		prev = seg;
+	}
+	*tail = prev;
 	return 0;
 }
 
 /* Internal: copy a UriTextRange to a newly-allocated buffer */
 static char *
-uri_range_copy_(UriTextRangeA *range)
+uri_range_copy_(const UriTextRangeA *range)
 {
 	size_t l;
 	char *buf;
@@ -181,7 +316,6 @@ uri_range_copy_(UriTextRangeA *range)
 	}
 	strncpy(buf, range->first, l);
 	buf[l - 1] = 0;
-	fprintf(stderr, "copied buffer [%s]\n", buf);
 	return buf;
 }
 
@@ -192,16 +326,8 @@ uri_range_copy_(UriTextRangeA *range)
  * src may be NULL. owner must be uri->owner.
  */
 static int
-uri_range_set_(UriTextRangeA *range, const char *src, UriBool owner)
+uri_range_set_(UriTextRangeA *range, const char *src)
 {
-	/* If the UriUri owns the range, and it's present, free it
-	 * before replacing. The owner flag must be cleared on the UriUri
-	 * instance after calling this function.
-	 */
-	if(owner && range->first && range->afterLast != range->first)
-	{
-		free((URI_CHAR *) range->first);
-	}
 	/* Set the range to point to the entire length of src (provided src
 	 * is non-NULL)
 	 */

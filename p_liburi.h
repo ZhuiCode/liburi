@@ -44,7 +44,6 @@ struct uri_struct
 {
 	/* A uriparser URI instance */
 	UriUriA uri;
-	char *buf; /* XXX this will go away */
 	/* Any of the below members may be NULL to indicate absence */
 	/* The URI scheme, e.g., 'http' */
 	char *scheme;
@@ -74,6 +73,8 @@ struct uri_struct
 	 */
 	UriPathSegmentA *pathfirst;
 	UriPathSegmentA *pathlast;
+	/* Is the path absolute? */
+	int pathabs;
 	/* The current path pointer (used with uri_peek(), uri_consume() and
 	 * uri_rewind())
 	 */
@@ -96,5 +97,9 @@ URI *uri_create_(void);
 URI *uri_dup_(const URI *src);
 int uri_reset_(URI *uri);
 int uri_postparse_(URI *uri);
+int uri_postparse_set_(URI *uri);
+
+int uri_hostdata_copy_(struct UriHostDataStructA *restrict dest, const struct UriHostDataStructA *restrict src);
+int uri_path_copy_(URI *dest, const UriPathSegmentA *head);
 
 #endif /*!P_LIBURI_H_*/
