@@ -106,6 +106,9 @@ int uri_absolute_path(const URI *uri);
 	
 /* Copy the URI's scheme into the buffer provided */
 size_t uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen);
+const char *uri_scheme_str(const URI *uri);
+char *uri_scheme_stralloc(const URI *uri);
+int uri_set_scheme(URI *restrict uri, const char *restrict newscheme);
 
 /* Copy the URI's authentication information into the buffer provided */
 size_t uri_auth(const URI *restrict uri, char *restrict buf, size_t buflen);

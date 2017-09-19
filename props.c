@@ -32,12 +32,6 @@ static int uri_info_parseparams_(URI_INFO *info);
 static int uri_info_param_add_(URI_INFO *info, const char *key, const char *value);
 
 size_t
-uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
-{
-	return uri_get_(&(uri->uri.scheme), buf, buflen);
-}
-
-size_t
 uri_auth(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	return uri_get_(&(uri->uri.userInfo), buf, buflen);
