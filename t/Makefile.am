@@ -1,6 +1,6 @@
 ## Author: Mo McRoberts <mo.mcroberts@bbc.co.uk>
 ##
-## Copyright 2016 BBC
+## Copyright 2016-2017 BBC
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ SUBDIRS = lib .
 
 LIBS = @LIBS@ lib/liburi-tests.la
 
-TESTS = anchor file-http-base parse-http
+TESTS = anchor file-http-base parse-http rebase-http
 
 XFAIL_TESTS = anchor file-http-base
 

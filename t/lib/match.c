@@ -173,6 +173,68 @@ test_recomposed(const char *restrict file, const char *restrict src, const char 
 	return r == 0 ? PASS : FAIL;
 }
 
+int
+test_urimatch_simple(const char *restrict file, struct urimatch_simple *restrict tests)
+{
+	URI *uri, *base;
+	int failed;
+	char *buffer;
+	size_t c;
+
+	failed = 0;
+	for(c = 0; tests[c].uri; c++)
+	{
+		base = NULL;
+		if(tests[c].base)
+		{
+			base = uri_create_str(tests[c].base, NULL);
+			if(!base)
+			{
+				fprintf(stderr, "%s: failed to construct base URI '%s': %s\n", file, tests[c].base, strerror(errno));
+				failed++;
+				continue;
+			}
+		}
+		uri = uri_create_str(tests[c].uri, base);
+		if(!uri)
+		{
+			fprintf(stderr, "%s: failed to construct URI '%s': %s\n", file, tests[c].uri, strerror(errno));
+			uri_destroy(base);
+			failed++;
+			continue;
+		}
+		buffer = uri_stralloc(uri);
+		if(!buffer)
+		{
+			fprintf(stderr, "%s: failed to obtain re-composed URI for '%s': %s\n", file, tests[c].uri, strerror(errno));
+			failed++;
+		}
+		else if(strcmp(buffer, tests[c].expected))
+		{
+			fprintf(stderr, "%s: re-composed URI <%s> does not match expected string '%s'\n", file, buffer, tests[c].expected);
+			if(base)
+			{
+				free(buffer);
+				buffer = uri_stralloc(base);
+				fprintf(stderr, "%s: base was <%s>\n", file, buffer);
+			}
+			else
+			{
+				fprintf(stderr, "%s: (no base URI provided)\n", file);
+			}
+			failed++;		  
+		}
+		else
+		{
+			fprintf(stderr, "%s: OK: <%s>: matched '%s'\n", file, tests[c].uri, tests[c].expected);
+		}
+		free(buffer);
+		uri_destroy(uri);
+		uri_destroy(base);
+	}
+	return failed == 0 ? PASS : FAIL;
+}
+
 static int
 testlen(const char *restrict file, const char *name, const URI *restrict uri, struct urimatch *restrict test, size_t (*fn)(const URI *restrict, char *restrict, size_t), size_t expected)
 {

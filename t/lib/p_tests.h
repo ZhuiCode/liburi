@@ -81,7 +81,15 @@ struct urimatch
 	unsigned long testmask;
 };
 
+struct urimatch_simple
+{
+	const char *uri;
+	const char *base;
+	const char *expected;
+};
+
 extern int test_urimatch(const char *restrict file, struct urimatch *restrict matches);
+extern int test_urimatch_simple(const char *restrict file, struct urimatch_simple *restrict matches);
 extern int test_recomposed(const char *restrict file, const char *restrict src, const char *restrict expected, URI *restrict base);
 
 #endif /*!P_TESTS_H_*/
