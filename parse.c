@@ -77,7 +77,12 @@ uri_create_ascii(const char *restrict str, const URI *restrict base)
 			return NULL;
 		}
 	}
-	if(uri_postparse_(uri) || uri_rebase(uri, base))
+	if(uri_postparse_(uri))
+	{
+		uri_destroy(uri);
+		return NULL;
+	}
+	if(uri_rebase(uri, base))
 	{
 		uri_destroy(uri);
 		return NULL;

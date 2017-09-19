@@ -34,8 +34,9 @@ static int uri_rebase_nonhier_(URI *restrict reluri, const URI *restrict base);
 int
 uri_rebase(URI *restrict reluri, const URI *restrict base)
 {
-	UriUriA absolute;
-	
+	URI abstemp;
+
+	memset(&abstemp, 0, sizeof(URI));	
 	if(!base || reluri->scheme)
 	{
 		/* Either no base provided (no-op), or reluri is already
@@ -52,29 +53,30 @@ uri_rebase(URI *restrict reluri, const URI *restrict base)
 		 */
 		return uri_rebase_nonhier_(reluri, base);
 	}
-	if(uriAddBaseUriA(&absolute, &(reluri->uri), &(base->uri)) != URI_SUCCESS)
+	if(uriAddBaseUriA(&(abstemp.uri), &(reluri->uri), &(base->uri)) != URI_SUCCESS)
 	{
 		/* Rebasing failed */
 		return -1;
 	}
-	if(uriEqualsUriA(&absolute, &(reluri->uri)) == URI_TRUE)
+	if(uriEqualsUriA(&(abstemp.uri), &(reluri->uri)) == URI_TRUE)
 	{
 		/* Rebasing didn't result in a new URI */
-		uriFreeUriMembersA(&absolute);
+		uriFreeUriMembersA(&(abstemp.uri));
 		return 0;
 	}
+	uri_postparse_(&abstemp);
 	/* Free the resources used by reluri, replace its contents with that
 	 * from absolute.
 	 */
 	uri_reset_(reluri);
-	memcpy(&(reluri->uri), &absolute, sizeof(UriUriA));
-	uri_postparse_(reluri);
+	memcpy(reluri, &abstemp, sizeof(URI));
 	return 0;
 }
 
 static int
 uri_rebase_nonhier_(URI *restrict reluri, const URI *restrict base)
 {
-	/* Currently a no-op */
-	return 0;
+	/* Currently not possible */
+	errno = EPERM;
+	return -1;
 }
