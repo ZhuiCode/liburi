@@ -142,6 +142,10 @@ uri_postparse_(URI *uri)
 	 * own any of the memory its text ranges point at.
 	 */
 	uri->scheme = uri_range_copy_(&(uri->uri.scheme));
+	if(uri->scheme)
+	{
+		uri->absolute = 1;
+	}
 	uri->auth = uri_range_copy_(&(uri->uri.userInfo));
 	uri->hoststr = uri_range_copy_(&(uri->uri.hostText));
 	uri->portstr = uri_range_copy_(&(uri->uri.portText));

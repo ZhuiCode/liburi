@@ -104,32 +104,47 @@ int uri_absolute(const URI *uri);
  */
 int uri_absolute_path(const URI *uri);
 	
-/* Copy the URI's scheme into the buffer provided */
+/* Get or set the URI's scheme */
 size_t uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen);
 const char *uri_scheme_str(const URI *uri);
 char *uri_scheme_stralloc(const URI *uri);
 int uri_set_scheme(URI *restrict uri, const char *restrict newscheme);
 
-/* Copy the URI's authentication information into the buffer provided */
+/* Get or set the URI's authentication information (typically 'user' or
+ * 'user:pass')
+ */
 size_t uri_auth(const URI *restrict uri, char *restrict buf, size_t buflen);
+const char *uri_auth_str(const URI *uri);
+char *uri_auth_stralloc(const URI *uri);
+int uri_set_auth(URI *restrict uri, const char *restrict newauth);
 
-/* Copy the URI's hostname into the buffer provided */
+/* Get or set the URI's hostname */
 size_t uri_host(const URI *restrict uri, char *restrict buf, size_t buflen);
+const char *uri_host_str(const URI *uri);
+char *uri_host_stralloc(const URI *uri);
+int uri_set_host(URI *restrict uri, const char *restrict newhost);
 
 /* Copy the URI's port into the buffer provided */
 size_t uri_port(const URI *restrict uri, char *restrict buf, size_t buflen);
+const char *uri_port_str(const URI *uri);
+char *uri_port_stralloc(const URI *uri);
+int uri_portnum(const URI *uri);
+int uri_set_port(URI *restrict uri, int newport);
 
 /* Copy the URI's path into the buffer provided */
 size_t uri_path(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 /* Copy the URI's query string into the buffer provided */
 size_t uri_query(const URI *restrict uri, char *restrict buf, size_t buflen);
+const char *uri_query_str(const URI *uri);
+char *uri_query_stralloc(const URI *uri);
+int uri_set_query(URI *restrict uri, const char *newquery);
 
 /* Copy the URI's fragment into the buffer provided */
 size_t uri_fragment(const URI *restrict uri, char *restrict buf, size_t buflen);
-
-/* Return the URI's port number, if present, as an integer */
-int uri_portnum(const URI *uri);
+const char *uri_fragment_str(const URI *uri);
+char *uri_fragment_stralloc(const URI *uri);
+int uri_set_fragment(URI *restrict uri, const char *newquery);
 
 /* Copy the whole URI, as a string, into the buffer provided */
 size_t uri_str(const URI *restrict uri, char *restrict buf, size_t buflen);

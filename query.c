@@ -25,12 +25,12 @@
 
 #include "p_liburi.h"
 
-/* 'scheme' property accessors */
+/* 'query' property accessors */
 
 size_t
-uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
+uri_query(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
-	if(!uri->scheme)
+	if(!uri->query)
 	{
 		if(buf && buflen)
 		{
@@ -40,58 +40,58 @@ uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
 	}
 	if(buf && buflen)
 	{
-		strncpy(buf, uri->scheme, buflen - 1);
+		strncpy(buf, uri->query, buflen - 1);
 		buf[buflen - 1] = 0;
 	}
-	return strlen(uri->scheme) + 1;
+	return strlen(uri->query) + 1;
 }
 
-/* Return the scheme as const string pointer */
+/* Return the query as const string pointer */
 const char *
-uri_scheme_str(const URI *uri)
+uri_query_str(const URI *uri)
 {
-	return uri->scheme;
+	return uri->query;
 }
 
-/* Return the scheme as a newly-allocated string (which must be freed by
+/* Return the query as a newly-allocated string (which must be freed by
  * the caller)
  */
 char *
-uri_scheme_stralloc(const URI *uri)
+uri_query_stralloc(const URI *uri)
 {
-	if(!uri->scheme)
+	if(!uri->query)
 	{
 		errno = 0;
 		return NULL;
 	}
-	return strdup(uri->scheme);
+	return strdup(uri->query);
 }
 
-/* Set a new scheme (or remove it if newscheme is NULL) */
+/* Set a new query (or remove it if newquery is NULL) */
 int
-uri_set_scheme(URI *restrict uri, const char *restrict newscheme)
+uri_set_query(URI *restrict uri, const char *restrict newquery)
 {
 	char *sbuf;
 	
-	if(newscheme)
+	if(newquery)
 	{
-		sbuf = strdup(newscheme);
+		sbuf = strdup(newquery);
 		if(!sbuf)
 		{
 			return -1;
 		}
-		newscheme = sbuf;
+		newquery = sbuf;
 	}
-	free(uri->scheme);
-	uri->scheme = sbuf;
-	uri->uri.scheme.first = sbuf;
+	free(uri->query);
+	uri->query = sbuf;
+	uri->uri.query.first = sbuf;
 	if(sbuf)
 	{
-		uri->uri.scheme.afterLast = strchr(sbuf, 0);
+		uri->uri.query.afterLast = strchr(sbuf, 0);
 	}
 	else
 	{
-		uri->uri.scheme.afterLast = NULL;
+		uri->uri.query.afterLast = NULL;
 	}
 	return 0;
 }

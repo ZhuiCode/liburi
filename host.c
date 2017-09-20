@@ -25,12 +25,12 @@
 
 #include "p_liburi.h"
 
-/* 'scheme' property accessors */
+/* 'host' property accessors */
 
 size_t
-uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
+uri_host(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
-	if(!uri->scheme)
+	if(!uri->hoststr)
 	{
 		if(buf && buflen)
 		{
@@ -40,58 +40,58 @@ uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
 	}
 	if(buf && buflen)
 	{
-		strncpy(buf, uri->scheme, buflen - 1);
+		strncpy(buf, uri->hoststr, buflen - 1);
 		buf[buflen - 1] = 0;
 	}
-	return strlen(uri->scheme) + 1;
+	return strlen(uri->hoststr) + 1;
 }
 
-/* Return the scheme as const string pointer */
+/* Return the host as const string pointer */
 const char *
-uri_scheme_str(const URI *uri)
+uri_host_str(const URI *uri)
 {
-	return uri->scheme;
+	return uri->hoststr;
 }
 
-/* Return the scheme as a newly-allocated string (which must be freed by
+/* Return the host as a newly-allocated string (which must be freed by
  * the caller)
  */
 char *
-uri_scheme_stralloc(const URI *uri)
+uri_host_stralloc(const URI *uri)
 {
-	if(!uri->scheme)
+	if(!uri->hoststr)
 	{
 		errno = 0;
 		return NULL;
 	}
-	return strdup(uri->scheme);
+	return strdup(uri->hoststr);
 }
 
-/* Set a new scheme (or remove it if newscheme is NULL) */
+/* Set a new host (or remove it if newhost is NULL) */
 int
-uri_set_scheme(URI *restrict uri, const char *restrict newscheme)
+uri_set_host(URI *restrict uri, const char *restrict newhost)
 {
 	char *sbuf;
 	
-	if(newscheme)
+	if(newhost)
 	{
-		sbuf = strdup(newscheme);
+		sbuf = strdup(newhost);
 		if(!sbuf)
 		{
 			return -1;
 		}
-		newscheme = sbuf;
+		newhost = sbuf;
 	}
-	free(uri->scheme);
-	uri->scheme = sbuf;
-	uri->uri.scheme.first = sbuf;
+	free(uri->hoststr);
+	uri->hoststr = sbuf;
+	uri->uri.hostText.first = sbuf;
 	if(sbuf)
 	{
-		uri->uri.scheme.afterLast = strchr(sbuf, 0);
+		uri->uri.hostText.afterLast = strchr(sbuf, 0);
 	}
 	else
 	{
-		uri->uri.scheme.afterLast = NULL;
+		uri->uri.hostText.afterLast = NULL;
 	}
 	return 0;
 }

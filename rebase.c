@@ -37,7 +37,7 @@ uri_rebase(URI *restrict reluri, const URI *restrict base)
 	URI abstemp;
 
 	memset(&abstemp, 0, sizeof(URI));	
-	if(!base || reluri->scheme)
+	if(!base || reluri->absolute)
 	{
 		/* Either no base provided (no-op), or reluri is already
 		 * absolute.

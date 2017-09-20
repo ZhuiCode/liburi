@@ -25,12 +25,12 @@
 
 #include "p_liburi.h"
 
-/* 'scheme' property accessors */
+/* 'auth' property accessors */
 
 size_t
-uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
+uri_auth(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
-	if(!uri->scheme)
+	if(!uri->auth)
 	{
 		if(buf && buflen)
 		{
@@ -40,58 +40,65 @@ uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
 	}
 	if(buf && buflen)
 	{
-		strncpy(buf, uri->scheme, buflen - 1);
+		strncpy(buf, uri->auth, buflen - 1);
 		buf[buflen - 1] = 0;
 	}
-	return strlen(uri->scheme) + 1;
+	return strlen(uri->auth) + 1;
 }
 
-/* Return the scheme as const string pointer */
+/* Return the auth as const string pointer */
 const char *
-uri_scheme_str(const URI *uri)
+uri_auth_str(const URI *uri)
 {
-	return uri->scheme;
+	return uri->auth;
 }
 
-/* Return the scheme as a newly-allocated string (which must be freed by
+/* Return the auth as a newly-allocated string (which must be freed by
  * the caller)
  */
 char *
-uri_scheme_stralloc(const URI *uri)
+uri_auth_stralloc(const URI *uri)
 {
-	if(!uri->scheme)
+	if(!uri->auth)
 	{
 		errno = 0;
 		return NULL;
 	}
-	return strdup(uri->scheme);
+	return strdup(uri->auth);
 }
 
-/* Set a new scheme (or remove it if newscheme is NULL) */
+/* Set a new auth (or remove it if newauth is NULL) */
 int
-uri_set_scheme(URI *restrict uri, const char *restrict newscheme)
+uri_set_auth(URI *restrict uri, const char *restrict newauth)
 {
 	char *sbuf;
 	
-	if(newscheme)
+	if(newauth)
 	{
-		sbuf = strdup(newscheme);
+		sbuf = strdup(newauth);
 		if(!sbuf)
 		{
 			return -1;
 		}
-		newscheme = sbuf;
+		newauth = sbuf;
 	}
-	free(uri->scheme);
-	uri->scheme = sbuf;
-	uri->uri.scheme.first = sbuf;
+	free(uri->auth);
+	uri->auth = sbuf;
+	uri->uri.userInfo.first = sbuf;
 	if(sbuf)
 	{
-		uri->uri.scheme.afterLast = strchr(sbuf, 0);
+		uri->uri.userInfo.afterLast = strchr(sbuf, 0);
 	}
 	else
 	{
-		uri->uri.scheme.afterLast = NULL;
+		uri->uri.userInfo.afterLast = NULL;
 	}
+	/* Reset the user and password components so that they will be
+	 * re-parsed
+	 */
+	free(uri->user);
+	free(uri->password);
+	uri->user = NULL;
+	uri->password = NULL;
 	return 0;
 }

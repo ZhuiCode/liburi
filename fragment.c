@@ -25,12 +25,12 @@
 
 #include "p_liburi.h"
 
-/* 'scheme' property accessors */
+/* 'fragment' property accessors */
 
 size_t
-uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
+uri_fragment(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
-	if(!uri->scheme)
+	if(!uri->fragment)
 	{
 		if(buf && buflen)
 		{
@@ -40,58 +40,58 @@ uri_scheme(const URI *restrict uri, char *restrict buf, size_t buflen)
 	}
 	if(buf && buflen)
 	{
-		strncpy(buf, uri->scheme, buflen - 1);
+		strncpy(buf, uri->fragment, buflen - 1);
 		buf[buflen - 1] = 0;
 	}
-	return strlen(uri->scheme) + 1;
+	return strlen(uri->fragment) + 1;
 }
 
-/* Return the scheme as const string pointer */
+/* Return the fragment as const string pointer */
 const char *
-uri_scheme_str(const URI *uri)
+uri_fragment_str(const URI *uri)
 {
-	return uri->scheme;
+	return uri->fragment;
 }
 
-/* Return the scheme as a newly-allocated string (which must be freed by
+/* Return the fragment as a newly-allocated string (which must be freed by
  * the caller)
  */
 char *
-uri_scheme_stralloc(const URI *uri)
+uri_fragment_stralloc(const URI *uri)
 {
-	if(!uri->scheme)
+	if(!uri->fragment)
 	{
 		errno = 0;
 		return NULL;
 	}
-	return strdup(uri->scheme);
+	return strdup(uri->fragment);
 }
 
-/* Set a new scheme (or remove it if newscheme is NULL) */
+/* Set a new fragment (or remove it if newfragment is NULL) */
 int
-uri_set_scheme(URI *restrict uri, const char *restrict newscheme)
+uri_set_fragment(URI *restrict uri, const char *restrict newfragment)
 {
 	char *sbuf;
 	
-	if(newscheme)
+	if(newfragment)
 	{
-		sbuf = strdup(newscheme);
+		sbuf = strdup(newfragment);
 		if(!sbuf)
 		{
 			return -1;
 		}
-		newscheme = sbuf;
+		newfragment = sbuf;
 	}
-	free(uri->scheme);
-	uri->scheme = sbuf;
-	uri->uri.scheme.first = sbuf;
+	free(uri->fragment);
+	uri->fragment = sbuf;
+	uri->uri.fragment.first = sbuf;
 	if(sbuf)
 	{
-		uri->uri.scheme.afterLast = strchr(sbuf, 0);
+		uri->uri.fragment.afterLast = strchr(sbuf, 0);
 	}
 	else
 	{
-		uri->uri.scheme.afterLast = NULL;
+		uri->uri.fragment.afterLast = NULL;
 	}
 	return 0;
 }

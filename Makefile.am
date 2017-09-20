@@ -37,8 +37,8 @@ pkginclude_HEADERS = liburi.h URI.h
 lib_LTLIBRARIES = liburi.la
 
 liburi_la_SOURCES = p_liburi.h \
-	uri.c parse.c unicode.c fspath.c rebase.c props.c recompose.c \
-	scheme.c
+	uri.c parse.c unicode.c fspath.c rebase.c recompose.c info.c \
+	scheme.c auth.c host.c port.c path.c query.c fragment.c 
 
 liburi_la_CPPFLAGS = -I$(srcdir)/uriparser/include
 liburi_la_LDFLAGS = -avoid-version -export-symbols-regex '^uri_[a-z]'

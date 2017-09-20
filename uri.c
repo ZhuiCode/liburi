@@ -61,6 +61,14 @@ uri_destroy(URI *uri)
 	return 0;
 }	
 
+/* Return 1 if a URI is absolute, 0 otherwise */
+int
+uri_absolute(const URI *uri)
+{
+	return (uri->absolute ? 1 : 0);
+}
+
+
 /* Internal: allocate a new URI object */
 URI *
 uri_create_(void)
