@@ -36,7 +36,51 @@ static int uri_preprocess_utf8_(char *restrict buf, const unsigned char *restric
 URI *
 uri_create_wstr(const wchar_t *restrict wstr, const URI *restrict base)
 {
-	/* XXX We should do this via a custom UTF-8-only wcstombs() */
+	const wchar_t *t;
+	char *buf, *bp;
+	size_t l, needed;
+	URI *uri;
+
+	l = wcslen(wstr);
+	needed = l + 1;
+	for(t = wstr; *t; t++)
+	{
+		if(*t < 33)
+		{
+			l += 2;
+		}
+		else if(*t > 127)
+		{
+			/* Wide characters may use up to 6 bytes when UTF-8-encoded,
+			 * each of which is individually percent-encoded (so
+			 * consumes 3 bytes in the destination string, minus the
+			 * one byte we've already accounted for
+			 */
+			l += 17;
+		}
+	}
+	buf = (char *) calloc(1, needed);
+	if(!buf)
+	{
+		return NULL;
+	}
+	bp = buf;
+	for(t = wstr; *t; t++)
+	{
+		if(*t < 31 || *t > 127)
+		{
+			bp += uri_encode_wide_(bp, *t);
+		}
+		else
+		{
+			*bp = (char) *t;
+			bp++;
+		}
+	}
+	*bp = 0;
+	uri = uri_create_ascii(buf, base);
+	free(buf);
+	return uri;
 }
 
 /* Create a URI from a UTF-8-encoded string; any non-ASCII characters
