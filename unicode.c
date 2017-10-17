@@ -26,9 +26,11 @@
 #include "p_liburi.h"
 
 static size_t uri_wctoutf8_(int *dest, wchar_t ch);
+static size_t uri_encode_8bit_(char *dest, unsigned char ch);
 static size_t uri_encode_wide_(char *dest, wchar_t ch);
 static size_t uri_widebytes_(const char *uristr, size_t nbytes);
 static int uri_preprocess_(char *restrict buf, const char *restrict uristr, size_t nbytes);
+static int uri_preprocess_utf8_(char *restrict buf, const unsigned char *restrict uristr, size_t nbytes);
 
 /* Create a URI from a wide-character Unicode string */
 URI *
@@ -43,9 +45,36 @@ uri_create_wstr(const wchar_t *restrict wstr, const URI *restrict base)
 URI *
 uri_create_ustr(const unsigned char *restrict ustr, const URI *restrict base)
 {
-	/* XXX Duplicate the buffer, invoke uri_preprocess_utf8(), then
-	 * pass on to uri_create_ascii()
+	const unsigned char *t;
+	char *buf;
+	size_t l, needed;
+	URI *uri;
+
+	/* Determine the required buffer size, accounting for percent-encoding
+	 * of non-printable and non-ASCII characters
 	 */
+	l = strlen((const char *) ustr);
+	needed = l + 1;
+	for(t = ustr; *t; t++)
+	{
+		if(*t < 33 || *t > 127)
+		{
+			needed += 2;
+		}
+	}
+	buf = (char *) calloc(1, needed);
+	if(!buf)
+	{
+		return NULL;
+	}
+	if(uri_preprocess_utf8_(buf, ustr, l))
+	{
+		free(buf);
+		return NULL;
+	}
+	uri = uri_create_ascii(buf, base);
+	free(buf);
+	return uri;
 }
 
 /* Create a URI from a string in the current locale */
@@ -108,6 +137,24 @@ uri_wctoutf8_(int *dest, wchar_t ch)
 	dest[2] = 0x80 | ((ch & 0x000fc0) >>  6);
 	dest[3] = 0x80 | (ch & 0x00003f);
 	return 4;
+}
+
+/* Encode an 8-bit character as a percent-encoded sequence */
+static size_t
+uri_encode_8bit_(char *dest, unsigned char ch)
+{
+	static const char hexdig[16] = {
+		'0', '1', '2', '3', '4', '5', '6', '7',
+		'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+	};
+	
+	*dest = '%';
+	dest++;
+	*dest = hexdig[ch >> 4];
+	dest++;
+	*dest = hexdig[ch & 15];
+	dest++;
+	return 3;
 }
 
 /* Encode a Unicode wide-character as a sequence of percent-encoded
@@ -206,6 +253,42 @@ uri_preprocess_(char *restrict buf, const char *restrict uristr, size_t nbytes)
 		}
 		uristr += r;
 		nbytes -= r;
+	}
+	*bp = 0;
+	return 0;
+}
+
+/*
+ * Map a potential IRI to a URI (see section 3.1 of RFC3987), percent-encoding
+ * UTF-8 characters as we do
+ */
+static int
+uri_preprocess_utf8_(char *restrict buf, const unsigned char *restrict uristr, size_t nbytes)
+{
+	unsigned char ch;
+	char *bp;
+	int r;
+
+	/* Reset the multibyte shift state */
+	r = 0;
+	for(bp = buf; nbytes && *uristr;)
+	{
+		/* Convert the next character sequence into a wide character */
+		ch = *uristr;
+		if(ch < 33 || ch > 127)
+		{
+			/* If the character is outside of the ASCII printable range,
+			 * replace it with a percent-encoded UTF-8 equivalent
+			 */
+			bp += uri_encode_8bit_(bp, ch);
+		}
+		else
+		{
+			*bp = ch;
+			bp++;
+		}
+		uristr++;
+		nbytes--;
 	}
 	*bp = 0;
 	return 0;

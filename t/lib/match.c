@@ -46,7 +46,7 @@ test_urimatch(const char *restrict file, struct urimatch *restrict tests)
 		bl = 0;
 		if(tests[c].base)
 		{
-			base = uri_create_str(tests[c].base, NULL);
+			base = uri_create_ustr((const unsigned char *) tests[c].base, NULL);
 			bl = strlen(tests[c].base);
 			if(!base)
 			{
@@ -56,7 +56,7 @@ test_urimatch(const char *restrict file, struct urimatch *restrict tests)
 			}
 		}
 		bl += strlen(tests[c].uri);
-		uri = uri_create_str(tests[c].uri, base);
+		uri = uri_create_ustr((const unsigned char *) tests[c].uri, base);
 		if(!uri)
 		{
 			fprintf(stderr, "%s: failed to construct URI '%s': %s\n", file, tests[c].uri, strerror(errno));
@@ -153,7 +153,7 @@ test_recomposed(const char *restrict file, const char *restrict src, const char 
 	size_t buflen;
 	int r;
 	
-	uri = uri_create_str(src, base);
+	uri = uri_create_ustr((const unsigned char *) src, base);
 	if(!uri)
 	{
 		fprintf(stderr, "%s: failed to construct URI <%s>: %s\n", file, src, strerror(errno));
@@ -187,7 +187,7 @@ test_urimatch_simple(const char *restrict file, struct urimatch_simple *restrict
 		base = NULL;
 		if(tests[c].base)
 		{
-			base = uri_create_str(tests[c].base, NULL);
+			base = uri_create_ustr((const unsigned char *) tests[c].base, NULL);
 			if(!base)
 			{
 				fprintf(stderr, "%s: failed to construct base URI '%s': %s\n", file, tests[c].base, strerror(errno));
@@ -195,7 +195,7 @@ test_urimatch_simple(const char *restrict file, struct urimatch_simple *restrict
 				continue;
 			}
 		}
-		uri = uri_create_str(tests[c].uri, base);
+		uri = uri_create_ustr((const unsigned char *) tests[c].uri, base);
 		if(!uri)
 		{
 			fprintf(stderr, "%s: failed to construct URI '%s': %s\n", file, tests[c].uri, strerror(errno));
