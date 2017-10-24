@@ -99,7 +99,7 @@ uri_info(const URI *uri)
 	uri_info_parseparams_(p);
 	return p;
 }
-	
+
 /* Free a URI_INFO structure */
 int
 uri_info_destroy(URI_INFO *info)
@@ -116,7 +116,7 @@ const char *
 uri_info_get(URI_INFO *info, const char *key, const char *defval)
 {
 	size_t c;
-	
+
 	for(c = 0; info->params && info->params[c]; c += 2)
 	{
 		if(!strcmp(key, info->params[c]))
@@ -132,7 +132,7 @@ intmax_t
 uri_info_get_int(URI_INFO *info, const char *key, intmax_t defval)
 {
 	size_t c;
-	
+
 	for(c = 0; info->params && info->params[c]; c += 2)
 	{
 		if(!strcmp(key, info->params[c]))
@@ -181,7 +181,7 @@ uri_get_(const UriTextRangeA *restrict range, char *restrict buf, size_t bufsize
 		strncpy(buf, range->first, slen);
 		buf[slen] = 0;
 	}
-	return len + 1;	
+	return len + 1;
 }
 
 static int
@@ -204,7 +204,7 @@ uri_info_parseauth_(URI_INFO *info)
 	int n;
 	const char *s;
 	char *p;
-	
+
 	if(!info->auth)
 	{
 		return 0;
@@ -286,7 +286,7 @@ uri_info_parseauth_(URI_INFO *info)
 				}
 			}
 			*p = *s;
-			p++;			
+			p++;
 		}
 		*p = 0;
 	}
@@ -300,7 +300,7 @@ uri_info_parseparams_(URI_INFO *info)
 	const char *s, *t, *key, *value;
 	char *qbuf, *p;
 	char cbuf[3];
-	
+
 	if(!info->query)
 	{
 		return 0;
@@ -365,18 +365,25 @@ uri_info_param_add_(URI_INFO *info, const char *key, const char *value)
 {
 	char **p;
 	size_t n;
-	
+
 	if(!value)
 	{
 		value = "";
 	}
 	if(info->internal.nparams + 1 >= info->internal.nalloc)
 	{
+		int i;
+
 		/* Allocate in chunks of four parameters at a time plus sentinels */
 		p = (char **) realloc(info->params, sizeof(char *) * (info->internal.nalloc + 5) * 2);
 		if(!p)
 		{
 			return -1;
+		}
+		/* clear new memory; note that NULL may not == (void*)0, so don't use memset() */
+		for(i = 0; i < 10; i++)
+		{
+		    *(p + (2*info->internal.nparams) + i) = NULL;
 		}
 		info->params = p;
 		info->internal.nalloc += 4;
