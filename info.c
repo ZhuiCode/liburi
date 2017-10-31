@@ -370,25 +370,20 @@ uri_info_param_add_(URI_INFO *info, const char *key, const char *value)
 	{
 		value = "";
 	}
+	n = info->internal.nparams * 2;
 	if(info->internal.nparams + 1 >= info->internal.nalloc)
 	{
-		int i;
-
 		/* Allocate in chunks of four parameters at a time plus sentinels */
-		p = (char **) realloc(info->params, sizeof(char *) * (info->internal.nalloc + 5) * 2);
+		const size_t npairs = 4;
+		p = (char **) realloc(info->params, (info->internal.nalloc + npairs + 1) * sizeof(char *) * 2);
 		if(!p)
 		{
 			return -1;
 		}
-		/* clear new memory; note that NULL may not == (void*)0, so don't use memset() */
-		for(i = 0; i < 10; i++)
-		{
-		    *(p + (2*info->internal.nparams) + i) = NULL;
-		}
+		memset(p + n, 0, (npairs + 1) * sizeof(char *) * 2);
 		info->params = p;
-		info->internal.nalloc += 4;
+		info->internal.nalloc += npairs;
 	}
-	n = info->internal.nparams * 2;
 	info->params[n] = strdup(key);
 	info->params[n + 1] = strdup(value);
 	if(!info->params[info->internal.nparams] || !info->params[info->internal.nparams + 1])
