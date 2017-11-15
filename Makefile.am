@@ -40,7 +40,8 @@ liburi_la_SOURCES = p_liburi.h \
 	uri.c parse.c unicode.c fspath.c rebase.c recompose.c info.c \
 	scheme.c auth.c host.c port.c path.c query.c fragment.c 
 
-liburi_la_CPPFLAGS = -I$(srcdir)/uriparser/include
+# Because liburi_la_CPPFLAGS is specified, it overrides the default AM_CPPFLAGS
+liburi_la_CPPFLAGS = @AM_CPPFLAGS@ -I$(srcdir)/uriparser/include
 liburi_la_LDFLAGS = -avoid-version -export-symbols-regex '^uri_[a-z]'
 liburi_la_LIBADD = liburiparser.la
 
@@ -68,7 +69,8 @@ liburiparser_la_SOURCES = \
 	uriparser/src/UriResolve.c \
 	uriparser/src/UriShorten.c
 
-liburiparser_la_CPPFLAGS = -I$(top_srcdir)/uriparser/include
+# Because liburiparser_la_CPPFLAGS is specified, it overrides the default AM_CPPFLAGS
+liburiparser_la_CPPFLAGS = -I$(top_srcdir)/uriparser/include @AM_CPPFLAGS@
 
 test:
 	$(MAKE) check
