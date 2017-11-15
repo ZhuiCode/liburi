@@ -73,6 +73,7 @@ uri_set_fragment(URI *restrict uri, const char *restrict newfragment)
 {
 	char *sbuf;
 	
+	sbuf = NULL;
 	if(newfragment)
 	{
 		sbuf = strdup(newfragment);

@@ -72,7 +72,8 @@ int
 uri_set_auth(URI *restrict uri, const char *restrict newauth)
 {
 	char *sbuf;
-	
+
+	sbuf = NULL;
 	if(newauth)
 	{
 		sbuf = strdup(newauth);

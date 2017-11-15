@@ -72,7 +72,8 @@ int
 uri_set_host(URI *restrict uri, const char *restrict newhost)
 {
 	char *sbuf;
-	
+
+	sbuf = NULL;
 	if(newhost)
 	{
 		sbuf = strdup(newhost);

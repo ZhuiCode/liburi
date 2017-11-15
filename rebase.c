@@ -77,6 +77,7 @@ static int
 uri_rebase_nonhier_(URI *restrict reluri, const URI *restrict base)
 {
 	/* Currently not possible */
+#warning Handling non-hierarchical URIs is not yet supported
 	errno = EPERM;
 	return -1;
 }

@@ -26,7 +26,6 @@
 #include "p_liburi.h"
 
 static ssize_t uri_get_(const UriTextRangeA *restrict range, char *restrict buf, size_t bufsize);
-static int uri_addch_(int ch, char *restrict *restrict buf, size_t *restrict buflen);
 static int uri_info_parseauth_(URI_INFO *info);
 static int uri_info_parseparams_(URI_INFO *info);
 static int uri_info_param_add_(URI_INFO *info, const char *key, const char *value);
@@ -182,19 +181,6 @@ uri_get_(const UriTextRangeA *restrict range, char *restrict buf, size_t bufsize
 		buf[slen] = 0;
 	}
 	return len + 1;
-}
-
-static int
-uri_addch_(int ch, char *restrict *restrict buf, size_t *restrict buflen)
-{
-	if(*buf && *buflen)
-	{
-		**buf = ch;
-		(*buf)++;
-		**buf = 0;
-		(*buflen)--;
-	}
-	return 1;
 }
 
 /* Parse info->auth into info->user and info->pass */

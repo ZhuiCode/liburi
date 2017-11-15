@@ -72,7 +72,8 @@ int
 uri_set_query(URI *restrict uri, const char *restrict newquery)
 {
 	char *sbuf;
-	
+
+	sbuf = NULL;
 	if(newquery)
 	{
 		sbuf = strdup(newquery);

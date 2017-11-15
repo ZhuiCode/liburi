@@ -123,6 +123,7 @@ uri_schemeend_(const char *str)
 static int
 uri_parse_nonhier_(URI *restrict dest, const char *uristr)
 {
+#warning Handling non-hierarchical URIs is not yet supported
 	errno = EPERM;
 	return -1;
 }
