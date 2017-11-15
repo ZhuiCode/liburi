@@ -73,6 +73,7 @@ uri_set_scheme(URI *restrict uri, const char *restrict newscheme)
 {
 	char *sbuf;
 	
+	sbuf = NULL;
 	if(newscheme)
 	{
 		sbuf = strdup(newscheme);
