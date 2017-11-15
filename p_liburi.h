@@ -31,6 +31,9 @@
 
 # include "uriparser/Uri.h"
 
+/* How many parameter slots to allocate at once (not counting NULLs) */
+# define URI_PARAM_ALLOC_SLOTS          4
+
 struct uri_info_internal_data_struct
 {
 	char *buffer;
@@ -91,6 +94,10 @@ struct uri_struct
 	 * about aren't)
 	*/
 	int hier;
+	/* Parsed query-string parameters */
+	char **params;
+	size_t nparams;
+	size_t nparamalloc;
 };
 
 URI *uri_create_(void);
@@ -98,6 +105,8 @@ URI *uri_dup_(const URI *src);
 int uri_reset_(URI *uri);
 int uri_postparse_(URI *uri);
 int uri_postparse_set_(URI *uri);
+
+int uri_param_reset_internal_(URI *restrict uri);
 
 int uri_hostdata_copy_(struct UriHostDataStructA *restrict dest, const struct UriHostDataStructA *restrict src);
 int uri_path_copy_(URI *dest, const UriPathSegmentA *head);

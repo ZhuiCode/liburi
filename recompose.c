@@ -24,7 +24,9 @@ size_t
 uri_str(const URI *restrict uri, char *restrict buf, size_t buflen)
 {
 	int bufsize;
-
+	
+	/* Recompose query-string if needed */
+	/* Recompose path if needed */
 	if(uriToStringCharsRequiredA(&(uri->uri), &bufsize) != URI_SUCCESS)
 	{
 		return (size_t) -1;

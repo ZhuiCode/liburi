@@ -28,8 +28,12 @@
 /* 'query' property accessors */
 
 size_t
-uri_query(const URI *restrict uri, char *restrict buf, size_t buflen)
+uri_query(URI *restrict uri, char *restrict buf, size_t buflen)
 {
+	if(!uri->query && uri->params)
+	{
+		/* XXX Reconstitute uri->query from uri->params */
+	}
 	if(!uri->query)
 	{
 		if(buf && buflen)
@@ -48,8 +52,12 @@ uri_query(const URI *restrict uri, char *restrict buf, size_t buflen)
 
 /* Return the query as const string pointer */
 const char *
-uri_query_str(const URI *uri)
+uri_query_str(URI *uri)
 {
+	if(!uri->query && uri->params)
+	{
+		/* XXX Reconstitute uri->query from uri->params */
+	}
 	return uri->query;
 }
 
@@ -57,8 +65,12 @@ uri_query_str(const URI *uri)
  * the caller)
  */
 char *
-uri_query_stralloc(const URI *uri)
+uri_query_stralloc(URI *uri)
 {
+	if(!uri->query && uri->params)
+	{
+		/* XXX Reconstitute uri->query from uri->params */
+	}
 	if(!uri->query)
 	{
 		errno = 0;
@@ -94,5 +106,7 @@ uri_set_query(URI *restrict uri, const char *restrict newquery)
 	{
 		uri->uri.query.afterLast = NULL;
 	}
+	/* Reset uri->params now that uri->query has been modified */
+	uri_param_reset_internal_(uri);
 	return 0;
 }

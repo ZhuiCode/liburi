@@ -135,10 +135,15 @@ int uri_set_port(URI *restrict uri, int newport);
 size_t uri_path(const URI *restrict uri, char *restrict buf, size_t buflen);
 
 /* Copy the URI's query string into the buffer provided */
-size_t uri_query(const URI *restrict uri, char *restrict buf, size_t buflen);
-const char *uri_query_str(const URI *uri);
-char *uri_query_stralloc(const URI *uri);
+size_t uri_query(URI *restrict uri, char *restrict buf, size_t buflen);
+const char *uri_query_str(URI *uri);
+char *uri_query_stralloc(URI *uri);
 int uri_set_query(URI *restrict uri, const char *newquery);
+
+/* URI parameter handling */
+const char *uri_param_str(URI *restrict uri, const char *restrict key);
+char *uri_param_stralloc(URI *restrict uri, const char *restrict key);
+intmax_t uri_param_int(URI *restrict uri, const char *restrict key);
 
 /* Copy the URI's fragment into the buffer provided */
 size_t uri_fragment(const URI *restrict uri, char *restrict buf, size_t buflen);

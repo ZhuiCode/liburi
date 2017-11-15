@@ -38,7 +38,8 @@ lib_LTLIBRARIES = liburi.la
 
 liburi_la_SOURCES = p_liburi.h \
 	uri.c parse.c unicode.c fspath.c rebase.c recompose.c info.c \
-	scheme.c auth.c host.c port.c path.c query.c fragment.c 
+	scheme.c auth.c host.c port.c path.c query.c fragment.c \
+	param.c
 
 # Because liburi_la_CPPFLAGS is specified, it overrides the default AM_CPPFLAGS
 liburi_la_CPPFLAGS = @AM_CPPFLAGS@ -I$(srcdir)/uriparser/include
